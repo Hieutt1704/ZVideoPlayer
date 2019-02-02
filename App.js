@@ -1,6 +1,6 @@
-import {Dimensions, Image, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View} from 'react-native'
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { Component } from 'react'
-import { next, pause, play, prevous, zoom_in, zoom_out } from '../IconManager'
+// import { next, pause, play, prevous, zoom_in, zoom_out } from './IconManager'
 import Video from 'react-native-video'
 const { width, height } = Dimensions.get('window')
 
@@ -141,104 +141,107 @@ export default class ZVideo extends Component {
 
     render() {
 
-        const { data, progress, isFullscreen, isControls, isMidPause, isRepeat,
-            paused, isPrevous, isNext, duration, uri } = this.state
-        const widthProgress = isFullscreen ? height - 120 : width - 120
-        const videoContainer =  { width: width, height: 250, }
-        const controls = isFullscreen ? styles.rotateControls : styles.controls
-        const midControls = isFullscreen ? styles.rotateMidControls : styles.midControls
+        // const { data, progress, isFullscreen, isControls, isMidPause, isRepeat,
+        //     paused, isPrevous, isNext, duration, uri } = this.state
+        // const widthProgress = isFullscreen ? height - 120 : width - 120
+        // const videoContainer =  { width: width, height: 250, }
+        // const controls = isFullscreen ? styles.rotateControls : styles.controls
+        // const midControls = isFullscreen ? styles.rotateMidControls : styles.midControls
         // const uri = video[data]
 
-        const iconPause = !paused ? pause : play
-        const iconFullscreen = !isFullscreen ? zoom_in : zoom_out
-        const viewMidControll = !isMidPause ? null :
-            <View style={midControls}>
-                <TouchableWithoutFeedback onPress={this._toggleShow}>
-                    <Image source={iconPause} style={{ height: 40, width: 40 }} />
-                </TouchableWithoutFeedback>
-            </View>
-        const viewPrevous = !isPrevous ? null :
-            <TouchableOpacity onPress={this._togglePrevous} style={styles.iconButton}>
-                <Image source={prevous} style={styles.icon} />
-            </TouchableOpacity>
-        const viewNext = !isNext ? null :
-            <TouchableOpacity onPress={this._toggleNext} style={styles.iconButton}>
-                <Image source={next} style={styles.icon} />
-            </TouchableOpacity>
+        // const iconPause = !paused ? pause : play
+        // const iconFullscreen = !isFullscreen ? zoom_in : zoom_out
+        // const viewMidControll = !isMidPause ? null :
+        //     <View style={midControls}>
+        //         <TouchableWithoutFeedback onPress={this._toggleShow}>
+        //             <Image source={iconPause} style={{ height: 40, width: 40 }} />
+        //         </TouchableWithoutFeedback>
+        //     </View>
+        // const viewPrevous = !isPrevous ? null :
+        //     <TouchableOpacity onPress={this._togglePrevous} style={styles.iconButton}>
+        //         <Image source={prevous} style={styles.icon} />
+        //     </TouchableOpacity>
+        // const viewNext = !isNext ? null :
+        //     <TouchableOpacity onPress={this._toggleNext} style={styles.iconButton}>
+        //         <Image source={next} style={styles.icon} />
+        //     </TouchableOpacity>
 
         return (
-            <View style={styles.container}>
-                <TouchableWithoutFeedback onPress={this._toggleShow}>
-                    <View style={videoContainer}>
-                        <Video
-                            paused={paused}
-                            // source={{ uri: uri }}
-                            source={require('../../assets/Video/EndingDepartures.mp4')}
-                            source={data}
-                            style={{ width: "100%", height: "100%" }}
-                            onLoad={this._getDuration}
-                            onProgress={this._setProgress}
-                            onEnd={this._setEnd}
-                            ref={ref => {
-                                this.player = ref
-                            }}
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
-                {/* Mid control---------------------------------------------------------------------- */}
-                {/* Pause----------------------------------------------------- */}
-                {viewMidControll}
-                {/* Repeat when video end--------------------------------------
-                {isRepeat ?
-                    <View style={midControls}>
-                        <TouchableWithoutFeedback>
-                            <Icon name={'repeat'} size={60} color='#FFF' />
-                        </TouchableWithoutFeedback>
-                    </View> : null
-                } */}
-                {/* Control------------------------------------------------------------------------ */}
-                {
-                    isControls ?
-                        <View style={controls}>
-                            <View style={styles.child}>
-                                {/* View duration fowlow progress--------------------------------------- */}
-                                <Text style={[styles.duration, { right: 10 }]}>
-                                    {/* {secondsToTime(Math.floor(progress * duration))} */}11:00
-                                </Text>
-                                {/* Progress------------------------------------------------------------- */}
-                                <TouchableWithoutFeedback onPress={(e) => this._toggleProgress(e, widthProgress)}>
-                                    <View style={{ width: widthProgress, backgroundColor: 'rgba(255,255,255,.5)', height: 5 }}>
-                                        <View style={{ width: progress * widthProgress, backgroundColor: '#FFF', height: 5 }} />
-                                        {/* <View style={{ width: (1 - progress) * widthProgress, height: 20 }}></View> */}
-                                    </View>
-                                </TouchableWithoutFeedback>
-                                <Text style={[styles.duration, { left: 10 }]}>
-                                    {/* {secondsToTime(Math.floor(duration))} */}00:00
-                                </Text>
-                            </View>
-                            <View style={styles.child}>
-                                {/* Prevous---------------------------------------------------------- */}
-                                {viewPrevous}
-                                {/* Play/Pause--------------------------------------------------------- */}
-                                <TouchableOpacity onPress={this._togglePlayPause} style={styles.iconButton}>
-                                    <Image source={iconPause} style={styles.icon} />
-                                </TouchableOpacity>
-                                {/* Next--------------------------------------------------------------- */}
-                                {viewNext}
-                                <View style={{ flex: 1 }} />
-                                <TouchableOpacity onPress={this._toggleFullscreen}>
-                                    <Image source={iconFullscreen} style={styles.icon} />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                        : null
-                }
-            </View>
+            <View style={styles.container} />
+            // <View style={styles.container}>
+            //     <TouchableWithoutFeedback onPress={this._toggleShow}>
+            //         <View style={videoContainer}>
+            //             <Video
+            //                 paused={paused}
+            //                 // source={{ uri: uri }}
+            //                 source={require('../../assets/Video/EndingDepartures.mp4')}
+            //                 source={data}
+            //                 style={{ width: "100%", height: "100%" }}
+            //                 onLoad={this._getDuration}
+            //                 onProgress={this._setProgress}
+            //                 onEnd={this._setEnd}
+            //                 ref={ref => {
+            //                     this.player = ref
+            //                 }}
+            //             />
+            //         </View>
+            //     </TouchableWithoutFeedback>
+            //     {/* Mid control---------------------------------------------------------------------- */}
+            //     {/* Pause----------------------------------------------------- */}
+            //     {viewMidControll}
+            //     {/* Repeat when video end--------------------------------------
+            //     {isRepeat ?
+            //         <View style={midControls}>
+            //             <TouchableWithoutFeedback>
+            //                 <Icon name={'repeat'} size={60} color='#FFF' />
+            //             </TouchableWithoutFeedback>
+            //         </View> : null
+            //     } */}
+            //     {/* Control------------------------------------------------------------------------ */}
+            //     {
+            //         isControls ?
+            //             <View style={controls}>
+            //                 <View style={styles.child}>
+            //                     {/* View duration fowlow progress--------------------------------------- */}
+            //                     <Text style={[styles.duration, { right: 10 }]}>
+            //                         {/* {secondsToTime(Math.floor(progress * duration))} */}11:00
+            //                     </Text>
+            //                     {/* Progress------------------------------------------------------------- */}
+            //                     <TouchableWithoutFeedback onPress={(e) => this._toggleProgress(e, widthProgress)}>
+            //                         <View style={{ width: widthProgress, backgroundColor: 'rgba(255,255,255,.5)', height: 5 }}>
+            //                             <View style={{ width: progress * widthProgress, backgroundColor: '#FFF', height: 5 }} />
+            //                             {/* <View style={{ width: (1 - progress) * widthProgress, height: 20 }}></View> */}
+            //                         </View>
+            //                     </TouchableWithoutFeedback>
+            //                     <Text style={[styles.duration, { left: 10 }]}>
+            //                         {/* {secondsToTime(Math.floor(duration))} */}00:00
+            //                     </Text>
+            //                 </View>
+            //                 <View style={styles.child}>
+            //                     {/* Prevous---------------------------------------------------------- */}
+            //                     {viewPrevous}
+            //                     {/* Play/Pause--------------------------------------------------------- */}
+            //                     <TouchableOpacity onPress={this._togglePlayPause} style={styles.iconButton}>
+            //                         <Image source={iconPause} style={styles.icon} />
+            //                     </TouchableOpacity>
+            //                     {/* Next--------------------------------------------------------------- */}
+            //                     {viewNext}
+            //                     <View style={{ flex: 1 }} />
+            //                     <TouchableOpacity onPress={this._toggleFullscreen}>
+            //                         <Image source={iconFullscreen} style={styles.icon} />
+            //                     </TouchableOpacity>
+            //                 </View>
+            //             </View>
+            //             : null
+            //     }
+            // </View>
         )
     }
 }
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        backgroundColor: 'white'
         // width: width,
         // height: 200,
     },
@@ -278,7 +281,7 @@ const styles = StyleSheet.create({
         height: 15,
         width: 15
     },
-    iconButton:{
+    iconButton: {
         marginRight: 15,
     }
 })
