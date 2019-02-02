@@ -8,6 +8,7 @@ export const pause = <Icon name={'pause-circle-outline'} size={px2dp(18)} color=
 export const play = <Icon name={'play-circle-outline'} size={px2dp(18)} color='#009ef8' />
 export const replay = <Icon name={'replay'} size={px2dp(18)} color='#009ef8' />
 export const next = (size) => <Icon name={'skip-next-circle-outline'} size={px2dp(size)} color='#009ef8' />
+export const skip_next = (size) => <Icon name={'skip-next'} size={px2dp(size)} color='#009ef8' />
 export const prevous = <Icon name={'skip-previous-circle-outline'} size={px2dp(18)} color='#009ef8' />
 export const zoom_in = <IconF name={'expand'} size={px2dp(18)} color='#009ef8' />
 export const zoom_out = <IconF name={'compress'} size={px2dp(18)} color='#009ef8' />
