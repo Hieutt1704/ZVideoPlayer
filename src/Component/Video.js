@@ -12,7 +12,7 @@ export default class ZVideo extends Component {
         super(props)
         this.state = {
             videos: [],
-            paused: true,
+            paused: false,
             isEnd: false,
             isControls: true,
             isNext: true,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
         // backgroundColor: 'red',
         height: 30,
         width: 35,
-        justifyContent:'center',
-        alignItems:'center'
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 })
