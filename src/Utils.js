@@ -36,11 +36,62 @@ function getBottomSpace(value) {
 
 const scale = size => deviceW / guidelineBaseWidth * size
 
+function findAllLetter(source, find) {
+    var result = []
+    if (source)
+        for (i = 0; i < source.length; ++i) {
+            // If you want to search case insensitive use 
+            // if (source.substring(i, i + find.length).toLowerCase() == find) {
+            if (source.substring(i, i + find.length) == find) {
+                result.push(i)
+            }
+        }
+    return result
+}
+
+function filterHtml(start_letter, end_letter, html) {
+    // html = html.replace(/[&]nbsp[;]/gi, " ")
+    // html = html.replace(/[<]br[^>]*[>]/gi, "")
+    html = html.replace(/\n/ig, '')
+    // html = html.replace('  ', '')
+    // console.log(html)
+    // console.log('HTML',html.length)
+    let startArr = findAllLetter(html, start_letter)
+    let endArr = findAllLetter(html, end_letter)
+    let videos = []
+    const slength = start_letter.length
+    const elength = end_letter.length
+    let firsrtItem = true
+    // console.log(start_letter, end_letter, startArr, endArr)
+    startArr.map((s, i) => { //s la index cua day chuoi dau 
+        endArr.map((e, j) => { // e la index cua day chuoi cuoi
+            if (endArr.length == 1 && s < e || firsrtItem) {
+                const item = html.slice(s + slength, e)
+                firsrtItem = false
+                videos.push(item)
+            }
+            if (j != 0 && endArr[j - 1] < s && s < e) {// s {...} e dung lien nhau 
+                const item = html.slice(s + slength, e - elength)
+                // console.log(html.length, s + slength, e - elength, length, item.length, item)
+                videos.push(item)
+            }
+        })
+    })
+    return videos
+}
+
+// Fix number xxxx -> x.xxx
+function fixNumber(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 export {
     px2dp,
     secondsToTime,
     isIphoneX,
     getStatusBarHeight,
     getBottomSpace,
-    scale
+    scale,
+    filterHtml,
+    fixNumber
 }

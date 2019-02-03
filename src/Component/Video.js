@@ -1,13 +1,12 @@
 import React, { Component } from 'react'
-import { Dimensions, StyleSheet, Text, TouchableOpacity, ProgressViewIOS, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import Video from 'react-native-video'
 import { secondsToTime } from '../Utils'
 import * as Progress from 'react-native-progress'
-import { next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay, skip_next } from '../IconManager'
+import { next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay, skip_next, headphones } from '../IconManager'
 
 const { width, height } = Dimensions.get('window')
-
 
 class ProgressCircle extends Component {
     constructor(props) {
@@ -18,23 +17,34 @@ class ProgressCircle extends Component {
         }
     }
 
-    componentDidMount() {
-        this.animate()
+    shouldComponentUpdate(nextProps, nextState) {
+        const { parentState } = this.props
+        const prevParentState = nextProps.parentState
+        if (JSON.stringify(parentState) != JSON.stringify(prevParentState))
+            return false
+        return true
     }
 
     animate() {
-        let progress = 0;
+        let progress = 0
         this.setState({ progress });
-        setTimeout(() => {
-            // this.setState({ indeterminate: false });
-            setInterval(() => {
-                progress += Math.random() / 10;
-                if (progress > 1) {
-                    progress = 1;
-                }
-                this.setState({ progress });
-            }, 500);
-        }, 500);
+        this.Interval = setInterval(() => {
+            progress += Math.random() / 7
+            if (progress > 1) {
+                progress = 1
+                alert('go')
+                clearInterval(this.Interval)
+            }
+            // console.log(progress)
+            this.setState({ progress })
+        }, 500)
+    }
+
+    clearCircle() {
+        if (this.state.progress > 0) {
+            this.setState({ progress: 0 })
+            clearInterval(this.Interval)
+        }
     }
 
     render() {
@@ -44,14 +54,13 @@ class ProgressCircle extends Component {
                 <Progress.Circle
                     size={40}
                     strokeCap='round'
-                    style={styles.progress}
                     progress={this.state.progress}
-                    indeterminate={this.state.indeterminate}
+                    indeterminate={false}
                 />
 
-                {/* <TouchableOpacity onPress={() => { }} activeOpacity={0.7}>
-                    {skip_next(36)}
-                </TouchableOpacity> */}
+                <TouchableOpacity onPress={() => { }} activeOpacity={0.7} style={styles.skipNext}>
+                    {skip_next(30)}
+                </TouchableOpacity>
 
             </View>
         )
@@ -88,11 +97,11 @@ export default class ZVideo extends Component {
 
     componentDidMount() {
         this._timeOut()
-        // requestAnimationFrame(() => {
-        //     this.setState({
-        //         isVisible: true,
-        //     });
-        // });
+        requestAnimationFrame(() => {
+            this.setState({
+                isVisible: true,
+            })
+        })
     }
 
     _timeOut() {
@@ -118,6 +127,8 @@ export default class ZVideo extends Component {
         if (progress >= 0.9981) { //when video end -> replay
             this.setState({ progress: 0, isEnd: false })
             this.player.seek(0)
+            if (this.Circle)
+                this.Circle.clearCircle()
         }
         this.setState({
             paused: !paused
@@ -128,6 +139,9 @@ export default class ZVideo extends Component {
         const position = e.nativeEvent.locationX
         const progress = (position / widthProgress) * this.state.duration
         this.player.seek(progress)
+        this.setState({ progress: (position / widthProgress), isEnd: false })
+        if (this.Circle)
+            this.Circle.clearCircle()
         this._timeOut()
     }
 
@@ -167,11 +181,10 @@ export default class ZVideo extends Component {
 
     _setEnd() {
         this.setState({ paused: true, isControls: true, isEnd: true }, () => {
-            // this.animate()
+            this.Circle.animate()
+            clearTimeout(this.lastTimeout)
         })
     }
-
-
 
     _getDuration(meta) {
         this.setState({
@@ -180,9 +193,9 @@ export default class ZVideo extends Component {
     }
 
     render() {
-        // if (!this.state.isVisible) {
-        //     return null
-        // }
+        if (!this.state.isVisible) {
+            return null
+        }
         const { data, progress, isControls, isEnd, indeterminate,
             paused, isPrevous, isNext, duration, progressCircle } = this.state
         // const widthProgress = isFullscreen ? height - 120 : width - 120
@@ -193,7 +206,11 @@ export default class ZVideo extends Component {
 
         const iconPause = isEnd ? replay : !paused ? pause : play
         // const iconFullscreen = !isFullscreen ? zoom_in : zoom_out
-        const viewMidControll = isEnd ? null : <ProgressCircle />
+        const viewMidControll = !isEnd ? null :
+            <ProgressCircle
+                prarentState
+                ref={ref => this.Circle = ref}
+            />
 
         const viewPrevous = !isPrevous ? null :
             <TouchableOpacity onPress={this._togglePrevous} style={styles.iconButton} activeOpacity={0.7}>
@@ -215,7 +232,6 @@ export default class ZVideo extends Component {
                 >
                     <Video
                         paused={paused}
-                        // source={{ uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
                         source={anh_yeu_em}
                         resizeMode={'cover'}
                         style={{ width, height: 250 }}
@@ -278,6 +294,13 @@ export default class ZVideo extends Component {
                     </View>
                     : null
                 }
+
+                <View style={styles.viewTitle}>
+                    <Text style={styles.title}>Nu cuoi man - </Text>
+                    <Text style={styles.singer}>Khắc Việt</Text>
+                    {headphones(20, 'black')}
+                    <Text style={styles.listen}> 56.000</Text>
+                </View>
             </View>
         )
     }
@@ -285,8 +308,8 @@ export default class ZVideo extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: 'blue'
+        // flex: 1,
+        // backgroundColor: 'blue'
     },
     video: {
         width,
@@ -294,12 +317,14 @@ const styles = StyleSheet.create({
         backgroundColor: 'black'
     },
     midControls: {
-        // backgroundColor: 'red',
-        // height: 40,
-        // width: 40,
         position: 'absolute',
-        left: (width - 36) / 2,
-        top: 107
+        left: (width - 40) / 2,
+        top: 105
+    },
+    skipNext: {
+        position: 'absolute',
+        top: 5,
+        left: 5
     },
     controls: {
         backgroundColor: 'rgba(0, 0, 0, 0)',
@@ -310,9 +335,9 @@ const styles = StyleSheet.create({
         position: 'absolute',
     },
     progress: {
-        // backgroundColor: 'rgba(255,255,255,.5)',
-        // height: 5,
-        // marginHorizontal: 10
+        backgroundColor: 'rgba(255,255,255,.5)',
+        height: 5,
+        marginHorizontal: 10
     },
     child: {
         flexDirection: 'row',
@@ -330,10 +355,33 @@ const styles = StyleSheet.create({
         width: 15
     },
     iconButton: {
-        // backgroundColor: 'red',
         height: 30,
         width: 35,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    viewTitle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 5,
+        marginTop: 10,
+        paddingBottom: 10,
+        marginBottom: 5,
+        borderBottomWidth: 0.5,
+        borderColor: 'grey'
+    },
+    title: {
+        fontSize: 16,
+        color: 'black',
+        fontWeight: 'bold'
+    },
+    singer: {
+        fontSize: 14,
+        color: 'black',
+        flex: 1
+    },
+    listen: {
+        fontSize: 14,
+        color: 'black'
     }
 })
