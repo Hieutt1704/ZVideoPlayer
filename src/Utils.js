@@ -92,6 +92,7 @@ export {
     getStatusBarHeight,
     getBottomSpace,
     scale,
+    findAllLetter,
     filterHtml,
     fixNumber
 }

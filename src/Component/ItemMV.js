@@ -18,9 +18,9 @@ const ItemMV = ({ item, }) => {
 
             <View style={styles.viewTotal}>
                 {headphones(18, 'white')}
-                <Text style={styles.total}>{item ? fixNumber(item.total_listen) : 0}</Text>
+                <Text style={styles.total}> {item ? fixNumber(item.total_listen) : 0}</Text>
                 <View style={{ flex: 1 }} />
-                <Text style={styles.total}>{item.total_time}</Text>
+                <Text style={styles.total}>{item.total_time} </Text>
             </View>
 
             <Text style={styles.song}>{item.title}</Text>
