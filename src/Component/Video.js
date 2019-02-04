@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native'
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing } from 'react-native'
 
 import data from '../assets/data'
 import Video from 'react-native-video'
-import { secondsToTime, fixNumber } from '../Utils'
+import { secondsToTime, fixNumber, getStatusBarHeight } from '../Utils'
 import * as Progress from 'react-native-progress'
 import {
     next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay,
@@ -20,17 +20,18 @@ class ProgressCircle extends Component {
         }
     }
 
+
     componentDidMount() {
         this.animate()
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        const { parentState } = this.props
-        const prevParentState = nextProps.parentState
-        if (JSON.stringify(parentState) != JSON.stringify(prevParentState))
-            return false
-        return true
-    }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     const { parentState } = this.props
+    //     const prevParentState = nextProps.parentState
+    //     if (JSON.stringify(parentState) != JSON.stringify(prevParentState))
+    //         return false
+    //     return true
+    // }
 
     componentWillUnmount() {
         clearInterval(this.Interval)
@@ -45,13 +46,11 @@ class ProgressCircle extends Component {
                 progress = 1
                 clearInterval(this.Interval)
                 this.props.goNext()
-                // console.log('anime')
             }
         }, 500)
     }
 
     clearCircle() {
-        // console.log('clear')
         if (this.state.progress > 0) {
             this.setState({ progress: 0 })
             clearInterval(this.Interval)
@@ -59,24 +58,30 @@ class ProgressCircle extends Component {
     }
 
     render() {
+        const { parentState } = this.props
+        const style = parentState.isFullscreen ? styles.fullMidControls : styles.midControls
+        const size = parentState.isFullscreen ? 60 : 40
+        const styleNext = parentState.isFullscreen ? styles.fullNext : styles.skipNext
+        const iconNext = parentState.isFullscreen ? skip_next(45) : skip_next(30)
         return (
-            <View style={[styles.midControls]}>
+            <View style={[style]}>
 
                 <Progress.Circle
-                    size={40}
+                    size={size}
                     strokeCap='round'
                     progress={this.state.progress}
                     indeterminate={false}
                 />
 
-                <TouchableOpacity onPress={() => this.props.goNext()} activeOpacity={0.7} style={styles.skipNext}>
-                    {skip_next(30)}
+                <TouchableOpacity onPress={() => this.props.goNext()} activeOpacity={0.7} style={styleNext}>
+                    {iconNext}
                 </TouchableOpacity>
 
             </View>
         )
     }
 }
+
 export default class ZVideo extends Component {
     constructor(props) {
         super(props)
@@ -94,6 +99,8 @@ export default class ZVideo extends Component {
             lastScreenPress: 0,
             isVisible: false,
             muted: false,
+            isFullscreen: false,
+            rotate: new Animated.Value(0)
         }
         this._timeOut = this._timeOut.bind(this)
         this._toggleShow = this._toggleShow.bind(this)
@@ -181,10 +188,14 @@ export default class ZVideo extends Component {
     }
 
     _toggleFullscreen() {
-        // const { isFullscreen } = this.state
-        // this.setState({ isFullscreen: !isFullscreen })
-        // const resize = isFullscreen == true ? 'stretch' : 'contain'
-        // this.setState({ resizeMode: resize })
+        const { isFullscreen, rotate } = this.state
+        this.setState({ isFullscreen: !isFullscreen })
+        this.props.onFullscreen(isFullscreen)
+        Animated.timing(rotate, {
+            toValue: isFullscreen ? 0 : 1,
+            duration: 500,
+            easing: Easing.linear,
+        }).start()
     }
 
     _toggleNext() {
@@ -221,53 +232,67 @@ export default class ZVideo extends Component {
             return null
         }
         const { item } = this.props
-        const { progress, isControls, isEnd, video, muted, playable,
+        const { progress, isControls, isEnd, video, muted, playable, isFullscreen,
             paused, isPrevous, isNext, duration, not_found } = this.state
-        // const widthProgress = isFullscreen ? height - 120 : width - 120
-        // const videoContainer = { width: width, height: 250, }
-        // const controls = isFullscreen ? styles.rotateControls : styles.controls
-        // const midControls = isFullscreen ? styles.rotateMidControls : styles.midControls
-        // const uri = video[data]
         const title = item ? item.title : ''
         const listen = item.total_listen ? fixNumber(item.total_listen) : 0
-        const iconPause = isEnd ? replay : !paused ? pause : play
-        // const iconFullscreen = !isFullscreen ? zoom_in : zoom_out
-        // console.log(video)
-        // console.log(isEnd)
+        //Fullscreen
+        const iconReplay = isFullscreen ? replay(30) : replay(18)
+        const iconPlay = isFullscreen ? play(30) : play(18)
+        const iconPause = isFullscreen ? pause(30) : pause(18)
+        const iconRun = isEnd ? iconReplay : !paused ? iconPause : iconPlay
+        const iconZin = isFullscreen ? zoom_in(30) : zoom_in(18)
+        const iconZout = isFullscreen ? zoom_out(30) : zoom_out(18)
+        const iconFullscreen = !isFullscreen ? iconZin : iconZout
+        const styleVideo = isFullscreen ? styles.fullVideo : styles.video
+        const stylePlayer = isFullscreen ? styles.fullPlayer : styles.player
+        const styleIcon = isFullscreen ? styles.fullIcon : styles.iconButton
+        const iconVolumeOn = isFullscreen ? volume_on(30) : volume_on(18)
+        const iconVolumeOff = isFullscreen ? volume_off(30) : volume_off(18)
+        const styleControl = isFullscreen ? styles.fullControls : styles.controls
+        const heightProgress = isFullscreen ? 10 : 5
+        const widthProgress = isFullscreen ? height : width
+        const sizeDuration = isFullscreen ? 16 : 12
+        const styleMid = isFullscreen ? styles.fullErr : styles.err
+        //animation
+        const rotate = this.state.rotate.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '90deg']
+        })
+
         const viewMidControll = !not_found ?
             !isEnd ?
                 progress >= playable || duration == 0 ?
-                    <View style={styles.err}>
+                    <View style={styleMid}>
                         <ActivityIndicator size={"large"} color={'#009ef8'} animating={true} />
                     </View> :
                     null :
                 <ProgressCircle
-                    prarentState={this.state}
+                    parentState={this.state}
                     ref={ref => this.Circle = ref}
                     goNext={this._toggleNext}
                 /> :
-            <View style={styles.err}>
+            <View style={styleMid}>
                 {alert_outline(40, 'white')}
                 <Text style={styles.textErr}>Not found!</Text>
             </View>
 
-
         const viewPrevous = !isPrevous ? null :
-            <TouchableOpacity onPress={this._togglePrevous} style={styles.iconButton} activeOpacity={0.7}>
-                {prevous}
+            <TouchableOpacity onPress={this._togglePrevous} style={styleIcon} activeOpacity={0.7}>
+                {isFullscreen ? prevous(30) : prevous(18)}
             </TouchableOpacity>
 
         const viewNext = !isNext ? null :
-            <TouchableOpacity onPress={this._toggleNext} style={styles.iconButton} activeOpacity={0.7}>
-                {next(18)}
+            <TouchableOpacity onPress={this._toggleNext} style={styleIcon} activeOpacity={0.7}>
+                {isFullscreen ? next(30) : next(18)}
             </TouchableOpacity>
 
         return (
-            <View style={styles.container}>
+            <Animated.View style={isFullscreen ? { transform: ([{ rotate }]) } : {}}>
 
                 <TouchableOpacity
                     onPress={this._toggleShow}
-                    style={styles.video}
+                    style={styleVideo}
                     activeOpacity={1}
                 >
                     <Video
@@ -275,7 +300,7 @@ export default class ZVideo extends Component {
                         paused={paused}
                         source={{ uri: video ? video : 'https://' }}
                         resizeMode={'cover'}
-                        style={styles.player}
+                        style={stylePlayer}
                         onLoad={this._getDuration}
                         onProgress={this._setProgress}
                         onEnd={this._setEnd}
@@ -287,48 +312,64 @@ export default class ZVideo extends Component {
                 {/* ========================== CONTROLL ========================= */}
 
                 {isControls ?
-                    <TouchableOpacity
-                        onPress={() => this.setState({ muted: !muted })}
-                        activeOpacity={0.7}
-                        style={[styles.iconButton, { position: 'absolute', top: 0 }]}
-                    >
-                        {muted ? volume_off : volume_on}
-                    </TouchableOpacity>
+                    <View style={{ position: 'absolute', flexDirection: 'row', alignItems: 'center', width: height - 50 }}>
+                        <TouchableOpacity
+                            onPress={() => this.setState({ muted: !muted })}
+                            activeOpacity={0.7}
+                            style={[styleIcon]}
+                        >
+                            {muted ? iconVolumeOff : iconVolumeOn}
+                        </TouchableOpacity>
+
+                        {isFullscreen ?
+                            <View style={{ flexDirection: "row", alignItems: 'center', flex: 1 }}>
+                                <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }} ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
+                                <Text style={{ fontSize: 16, color: 'white' }}>Khắc Việt</Text>
+                                <View style={{ flex: 1 }} />
+                                {headphones(25, 'white')}
+                                <Text style={{ fontSize: 16, color: 'white' }}> {listen}</Text>
+                            </View>
+                            : null
+                        }
+
+                    </View>
+
                     : null
                 }
+
                 {viewMidControll}
 
                 {isControls ?
-                    <View style={styles.controls}>
+                    <View style={styleControl}>
 
                         <TouchableOpacity
-                            onPress={(e) => this._toggleProgress(e, width - 20)}
+                            onPress={(e) => this._toggleProgress(e, widthProgress - 20)}
                             activeOpacity={1}
-                            style={styles.progress}
+                            style={[styles.progress, { height: heightProgress }]}
                         >
-                            <View style={[{ width: playable * (width - 20) }, styles.load]} />
-                            <View style={[{ width: progress * (width - 20) }, styles.play]} />
+                            <View style={[{ width: playable * (widthProgress - 20), height: heightProgress }, styles.load]} />
+                            <View style={[{ width: progress * (widthProgress - 20), height: heightProgress }, styles.play]} />
                         </TouchableOpacity>
 
-                        <View style={styles.child}>
+                        <View style={[styles.child, { marginHorizontal: isFullscreen ? 10 : 5 }]}>
 
                             {viewPrevous}
 
                             <TouchableOpacity
                                 onPress={this._togglePlayPause}
-                                style={styles.iconButton}
+                                style={styleIcon}
                                 activeOpacity={0.7}
                             >
-                                {iconPause}
+                                {iconRun}
                             </TouchableOpacity>
 
                             {viewNext}
 
-                            <Text style={[styles.duration]}>
+                            <Text style={[styles.duration, { fontSize: sizeDuration }]}>
                                 {secondsToTime(Math.floor(progress * duration))}/
                                 </Text>
 
-                            <Text style={[styles.duration]}>
+                            <Text style={[styles.duration, { fontSize: sizeDuration }]}>
                                 {secondsToTime(Math.floor(duration))}
                             </Text>
 
@@ -337,9 +378,9 @@ export default class ZVideo extends Component {
                             <TouchableOpacity
                                 onPress={this._toggleFullscreen}
                                 activeOpacity={0.7}
-                                style={styles.iconButton}
+                                style={styleIcon}
                             >
-                                {zoom_in}
+                                {iconFullscreen}
                             </TouchableOpacity>
 
                         </View>
@@ -348,22 +389,25 @@ export default class ZVideo extends Component {
                     : null
                 }
 
-                <View style={styles.viewTitle}>
-                    <Text style={styles.title} ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
-                    <Text style={styles.singer}>Khắc Việt</Text>
-                    <View style={{ flex: 1 }} />
-                    {headphones(20, 'black')}
-                    <Text style={styles.listen}> {listen}</Text>
-                </View>
-            </View>
+                {isFullscreen ? null :
+                    <View style={styles.viewTitle}>
+                        <Text style={styles.title} ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
+                        <Text style={styles.singer}>Khắc Việt</Text>
+                        <View style={{ flex: 1 }} />
+                        {headphones(20, 'black')}
+                        <Text style={styles.listen}> {listen}</Text>
+                    </View>
+                }
+            </Animated.View>
         )
     }
 }
 
 const styles = StyleSheet.create({
     container: {
-        // flex: 1,
-        // backgroundColor: 'blue'
+        transform: ([
+            { rotate: '90deg' },
+        ])
     },
     video: {
         width,
@@ -400,9 +444,9 @@ const styles = StyleSheet.create({
     child: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginHorizontal: 5,
+        // marginHorizontal: 5,
         justifyContent: 'center',
-        marginTop: 2.5,
+        marginTop: 2,
     },
     duration: {
         color: '#009ef8',
@@ -462,11 +506,67 @@ const styles = StyleSheet.create({
     },
     load: {
         backgroundColor: 'rgba(255,255,255,.5)',
-        height: 5
+        // height: 5
     },
     play: {
-        backgroundColor: '#009ef8'
-        , height: 5,
+        backgroundColor: '#009ef8',
+        // , height: 5,
         position: 'absolute'
-    }
+    },
+    volume: {
+        height: 30,
+        width: 35,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+    },
+    //Fullscreen
+    fullVideo: {
+        width: height - getStatusBarHeight(),
+        height: width + 2,
+    },
+    fullPlayer: {
+        width: height - getStatusBarHeight(),
+        height: width + 2,
+        backgroundColor: '#000007',
+    },
+    fullIcon: {
+        height: 40,
+        width: 45,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullControls: {
+        backgroundColor: 'rgba(0, 0, 0, 0)',
+        height: 50,
+        left: 0,
+        right: 0,
+        top: width - 50,
+        position: 'absolute',
+    },
+    fullErr: {
+        height: 40,
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+        left: (height - 80) / 2,
+        position: 'absolute',
+        top: (width - 50) / 2,
+    },
+    fullMidControls: {
+        position: 'absolute',
+        left: (height - 60) / 2,
+        top: (width - 60) / 2,
+    },
+    fullNext: {
+        position: 'absolute',
+        top: 7,
+        left: 7
+    },
 })
+
+// midControls: {
+//     position: 'absolute',
+//     left: (width - 40) / 2,
+//     top: 105
+// },

@@ -15,17 +15,18 @@ function secondsToTime(time) {
 }
 
 function isIphoneX() {
+    const dimen = Dimensions.get('window')
     return (
         Platform.OS === 'ios' &&
         !Platform.isPad &&
         !Platform.isTVOS &&
-        ((deviceW.height === 812 || deviceW.width === 812) || (deviceW.height === 896 || deviceW.width === 896))
-    )
+        ((dimen.height === 812 || dimen.width === 812) || (dimen.height === 896 || dimen.width === 896))
+    );
 }
 
 function getStatusBarHeight() {
     return Platform.select({
-        ios: isIphoneX() ? 64 : 40,
+        ios: isIphoneX() ? 40 : 20,
         android: 0
     })
 }

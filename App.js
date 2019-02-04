@@ -20,7 +20,8 @@ class App extends React.Component {
             end_page: false,
             is_refresh: false,
             err: false,
-            load_center: true
+            load_center: true,
+            isFullscreen: false,
         }
         this._getVideos = this._getVideos.bind(this)
         this._onRefresh = this._onRefresh.bind(this)
@@ -141,8 +142,8 @@ class App extends React.Component {
     }
 
     render() {
-
-        const { videos, end_page, is_refresh, err, load_center } = this.state
+        const { videos, end_page, is_refresh, err, load_center, isFullscreen } = this.state
+        // console.log(isFullscreen)
         const vLoad = !end_page && videos.length > 0 || load_center ?
             <View style={load_center ? styles.container : styles.loading}>
                 <ActivityIndicator size={"large"} color={'#009ef8'} animating={true} />
@@ -174,26 +175,30 @@ class App extends React.Component {
                             item={videos.length > 0 ? videos[0] : {}}
                             onNext={this._onNext}
                             onPrevous={this._onPrevous}
+                            onFullscreen={(isFull) => this.setState({ isFullscreen: !isFull })}
                         />
 
-                        <FlatList
-                            ref={ref => this.FlatList = ref}
-                            refreshing={is_refresh}
-                            onRefresh={this._onRefresh}
-                            data={videos}
-                            numColumns={2}
-                            keyExtractor={(item, index) => index + ''}
-                            renderItem={({ item, index }) =>
-                                <ItemMV
-                                    item={item}
-                                    index={index}
-                                    openVideo={this._openVideo}
-                                />
-                            }
-                            onEndReached={this._onLoadMore}
-                            onEndReachedThreshold={0.2}
-                            ListFooterComponent={vLoad}
-                        />
+                        {!isFullscreen ?
+                            <FlatList
+                                ref={ref => this.FlatList = ref}
+                                refreshing={is_refresh}
+                                onRefresh={this._onRefresh}
+                                data={videos}
+                                numColumns={2}
+                                keyExtractor={(item, index) => index + ''}
+                                renderItem={({ item, index }) =>
+                                    <ItemMV
+                                        item={item}
+                                        index={index}
+                                        openVideo={this._openVideo}
+                                    />
+                                }
+                                onEndReached={this._onLoadMore}
+                                onEndReachedThreshold={0.2}
+                                ListFooterComponent={vLoad}
+                            />
+                            : null
+                        }
 
                     </View>
                 }
