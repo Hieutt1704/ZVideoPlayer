@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native'
 
+import data from '../assets/data'
 import Video from 'react-native-video'
+import { secondsToTime, fixNumber } from '../Utils'
 import * as Progress from 'react-native-progress'
-import { secondsToTime, filterHtml, findAllLetter } from '../Utils'
-import { endUrlHref, startUrlVideo, endUrlVideo } from '../Networking/Apis'
-import { next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay, skip_next, headphones } from '../IconManager'
+import {
+    next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay,
+    skip_next, headphones, alert_outline, volume_off, volume_on
+} from '../IconManager'
 
 const { width, height } = Dimensions.get('window')
 
@@ -14,8 +17,11 @@ class ProgressCircle extends Component {
         super(props)
         this.state = {
             progress: 0,
-            indeterminate: false,
         }
+    }
+
+    componentDidMount() {
+        this.animate()
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -26,22 +32,26 @@ class ProgressCircle extends Component {
         return true
     }
 
+    componentWillUnmount() {
+        clearInterval(this.Interval)
+    }
+
     animate() {
         let progress = 0
-        this.setState({ progress });
         this.Interval = setInterval(() => {
             progress += Math.random() / 7
+            this.setState({ progress })
             if (progress > 1) {
                 progress = 1
                 clearInterval(this.Interval)
-                alert('go')
+                this.props.goNext()
+                // console.log('anime')
             }
-            // console.log(progress)
-            this.setState({ progress })
         }, 500)
     }
 
     clearCircle() {
+        // console.log('clear')
         if (this.state.progress > 0) {
             this.setState({ progress: 0 })
             clearInterval(this.Interval)
@@ -59,7 +69,7 @@ class ProgressCircle extends Component {
                     indeterminate={false}
                 />
 
-                <TouchableOpacity onPress={() => { }} activeOpacity={0.7} style={styles.skipNext}>
+                <TouchableOpacity onPress={() => this.props.goNext()} activeOpacity={0.7} style={styles.skipNext}>
                     {skip_next(30)}
                 </TouchableOpacity>
 
@@ -71,18 +81,19 @@ export default class ZVideo extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            videos: [],
+            video: '',
+            not_found: false,
             paused: false,
             isEnd: false,
             isControls: true,
             isNext: true,
             isPrevous: true,
+            playable: 0,
             progress: 0,
             duration: 0,
             lastScreenPress: 0,
             isVisible: false,
-            progress: 0,
-            indeterminate: true,
+            muted: false,
         }
         this._timeOut = this._timeOut.bind(this)
         this._toggleShow = this._toggleShow.bind(this)
@@ -97,53 +108,36 @@ export default class ZVideo extends Component {
     }
 
     componentDidMount() {
-        this._getVideo()
-        // var arrListCSSFilePlayer = [{ k: "player", v: "html5/nct-player-video/css/style.0.9.css" }];
-        // loadScript("css", arrListCSSFilePlayer, "html5/nct-player-video/");
-        // var arrListFilePlayer = [
-        //     { k: "player", v: "html5/nct-player-video/version/0.73.js" },
-        //     { k: "polyfiller", v: "html5/nct-player-video/polyfiller.js" },
-        //     { k: "vast-client", v: "html5/nct-player-video/utils/vast-client.js" },
-        //     { k: "hls-core", v: "html5/nct-player-video/hls/dist/hls.js" },
-        //     { k: "player16", v: "js/lib/nct.player.1.6.js" }
-        // ];
-        // loadScript("js", arrListFilePlayer, "");
-        this._timeOut()
+        const { item } = this.props
         requestAnimationFrame(() => {
             this.setState({
                 isVisible: true,
             })
         })
+        this._getVideo(item.href)
     }
 
     componentDidUpdate(nextProps, nextState) {
         const { item } = this.props
         const prevItem = nextProps.item
-        // console.log(item)
-        // if (item.href != prevItem.href && item.href)
-        //     this._getVideo(item.href)
+        if (item.href != prevItem.href && item.href)
+            this._getVideo(item.href)
     }
 
-    _getVideo() {
-        const url = 'https://www.nhaccuatui.com/video/nu-cuoi-man-khac-viet.bPlblM0LyNNcT.html'
-        fetch(url).then((resp) => {
-            console.log('??', resp)
-            if (resp.ok) return resp.text()
-            return false
-        }).then((text) => {
-            console.log(text)
-            //'5821823', '1549196522737', 'bf668d2d2a4081a5027a5b549a8041cd', "video
-
-            // link = 'https://vredir.nixcdn.com/PreNCT15/NuCuoiMan-KhacViet-5821823.mp4?st=bf668d2d2a4081a5027a5b549a8041cd&e=1549279520&t=1549196522737'
-            // console.log('???', findAllLetter(text, 'https://mcloud-bf-s7-mv-zmp3.zadn.vn/bp7rX-LThpo/cbcf9b690b2de273bb3c/d239953d9c7875262c69/360/Phia-Sau-Mot-Co-Gai.mp4?authen=exp=1549370916~acl=/bp7rX-LThpo/*~hmac=426a64ee2fb7ceba040d30d653ea8068'))
-            console.log('????', findAllLetter(text, '1549279520'))
-            console.log(findAllLetter(text, 'video'))
-            // console.log(findAllLetter(text, 'nQzcjJEwikmnqrIIUgYqXg'))
-            // // const list = filterHtml(startUrlVideo, endUrlVideo, text).map((e, i) => {
-            //     console.log(e)
-            // })
-            // <video playsinline="" class="videoTag" id="videonctPlayer" poster="" src="https://vredir.nixcdn.com/PreNCT15/NuCuoiMan-KhacViet-5831902.mp4?st=nQzcjJEwikmnqrIIUgYqXg&amp;e=1549279520&amp;t=1549193162296"></video>
+    _getVideo(url) {
+        if (this.player)
+            this.player.seek(0)
+        let not_found = true
+        data.map(e => {
+            if (e.html == url) {
+                this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, video: e.video })
+                not_found = false
+            }
         })
+        if (not_found)
+            this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, video: '', duration: 0 })
+        this.setState({ not_found })
+        this._timeOut()
     }
 
     _timeOut() {
@@ -169,8 +163,6 @@ export default class ZVideo extends Component {
         if (progress >= 0.9981) { //when video end -> replay
             this.setState({ progress: 0, isEnd: false })
             this.player.seek(0)
-            if (this.Circle)
-                this.Circle.clearCircle()
         }
         this.setState({
             paused: !paused
@@ -178,12 +170,11 @@ export default class ZVideo extends Component {
     }
 
     _toggleProgress(e, widthProgress) {
+        if (this.state.not_found) return
         const position = e.nativeEvent.locationX
         const progress = (position / widthProgress) * this.state.duration
         this.player.seek(progress)
         this.setState({ progress: (position / widthProgress), isEnd: false })
-        if (this.Circle)
-            this.Circle.clearCircle()
         this._timeOut()
     }
 
@@ -195,40 +186,30 @@ export default class ZVideo extends Component {
     }
 
     _toggleNext() {
-        // const { data, video } = this.state
-        // this.setState({ data: data + 1 })
-        // if (data + 1 == video.length - 1)
-        //     this.setState({ isNext: false })
-        // else
-        //     this.setState({ isNext: true, isPrevous: true, paused: false, isEnd: false })
-        // this.timeOut()
+        this.props.onNext()
     }
 
     _togglePrevous() {
-        // const { data, video } = this.state
-        // this.setState({ data: data - 1 })
-        // if (data - 1 == 0)
-        //     this.setState({ isPrevous: false })
-        // else
-        //     this.setState({ isNext: true, isPrevous: true, paused: false, isEnd: false })
-        // this.timeOut()
+        this.props.onPrevous()
     }
 
     _setProgress(progress) {
+        if (this.state.not_found) return
         const { duration } = this.state
         this.setState({
             progress: progress.currentTime / duration,
+            playable: progress.playableDuration / duration
         })
     }
 
     _setEnd() {
         this.setState({ paused: true, isControls: true, isEnd: true }, () => {
-            this.Circle.animate()
             clearTimeout(this.lastTimeout)
         })
     }
 
     _getDuration(meta) {
+        if (this.state.not_found) return
         this.setState({
             duration: meta.duration,
         })
@@ -239,23 +220,36 @@ export default class ZVideo extends Component {
             return null
         }
         const { item } = this.props
-        // console.log(item)
-        const { data, progress, isControls, isEnd, indeterminate,
-            paused, isPrevous, isNext, duration, progressCircle } = this.state
+        const { progress, isControls, isEnd, video, muted, playable,
+            paused, isPrevous, isNext, duration, not_found } = this.state
         // const widthProgress = isFullscreen ? height - 120 : width - 120
         // const videoContainer = { width: width, height: 250, }
         // const controls = isFullscreen ? styles.rotateControls : styles.controls
         // const midControls = isFullscreen ? styles.rotateMidControls : styles.midControls
         // const uri = video[data]
         const title = item ? item.title : ''
-        const listen = item ? item.total_listen : ''
+        const listen = item.total_listen ? fixNumber(item.total_listen) : 0
         const iconPause = isEnd ? replay : !paused ? pause : play
         // const iconFullscreen = !isFullscreen ? zoom_in : zoom_out
-        const viewMidControll = !isEnd ? null :
-            <ProgressCircle
-                prarentState
-                ref={ref => this.Circle = ref}
-            />
+        // console.log(video)
+        // console.log(isEnd)
+        const viewMidControll = !not_found ?
+            !isEnd ?
+                progress >= playable ?
+                    <View style={styles.err}>
+                        <ActivityIndicator size={"large"} color={'#009ef8'} animating={true} />
+                    </View> :
+                    null :
+                <ProgressCircle
+                    prarentState={this.state}
+                    ref={ref => this.Circle = ref}
+                    goNext={this._toggleNext}
+                /> :
+            <View style={styles.err}>
+                {alert_outline(40, 'white')}
+                <Text style={styles.textErr}>Not found!</Text>
+            </View>
+
 
         const viewPrevous = !isPrevous ? null :
             <TouchableOpacity onPress={this._togglePrevous} style={styles.iconButton} activeOpacity={0.7}>
@@ -276,20 +270,31 @@ export default class ZVideo extends Component {
                     activeOpacity={1}
                 >
                     <Video
+                        muted={muted}
                         paused={paused}
-                        // source={{ uri: 'blob:https://mp3.zing.vn/3ce8ac23-507a-4066-b7be-622ca43623cf' }}
-                        source={anh_yeu_em}
+                        source={{ uri: video ? video : 'https://' }}
                         resizeMode={'cover'}
-                        style={{ width, height: 250 }}
+                        style={styles.player}
                         onLoad={this._getDuration}
                         onProgress={this._setProgress}
                         onEnd={this._setEnd}
+                        onError={() => this.setState({ not_found: true })}
                         ref={ref => this.player = ref}
                     />
                 </TouchableOpacity>
 
                 {/* ========================== CONTROLL ========================= */}
 
+                {isControls ?
+                    <TouchableOpacity
+                        onPress={() => this.setState({ muted: !muted })}
+                        activeOpacity={0.7}
+                        style={[styles.iconButton, { position: 'absolute', top: 0 }]}
+                    >
+                        {muted ? volume_off : volume_on}
+                    </TouchableOpacity>
+                    : null
+                }
                 {viewMidControll}
 
                 {isControls ?
@@ -300,7 +305,8 @@ export default class ZVideo extends Component {
                             activeOpacity={1}
                             style={styles.progress}
                         >
-                            <View style={{ width: progress * (width - 20), backgroundColor: '#009ef8', height: 5 }} />
+                            <View style={[{ width: playable * (width - 20) }, styles.load]} />
+                            <View style={[{ width: progress * (width - 20) }, styles.play]} />
                         </TouchableOpacity>
 
                         <View style={styles.child}>
@@ -342,8 +348,9 @@ export default class ZVideo extends Component {
                 }
 
                 <View style={styles.viewTitle}>
-                    <Text style={styles.title}>{title} - </Text>
+                    <Text style={styles.title} ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
                     <Text style={styles.singer}>Khắc Việt</Text>
+                    <View style={{ flex: 1 }} />
                     {headphones(20, 'black')}
                     <Text style={styles.listen}> {listen}</Text>
                 </View>
@@ -360,7 +367,11 @@ const styles = StyleSheet.create({
     video: {
         width,
         height: 250,
-        backgroundColor: 'black'
+        backgroundColor: '#000007'
+    },
+    player: {
+        width,
+        height: 250
     },
     midControls: {
         position: 'absolute',
@@ -381,7 +392,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
     },
     progress: {
-        backgroundColor: 'rgba(255,255,255,.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
         height: 5,
         marginHorizontal: 10
     },
@@ -407,8 +418,11 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     viewTitle: {
+        // flex: 1,
+        width: width - 10,
         flexDirection: 'row',
         alignItems: 'center',
+        alignContent: 'stretch',
         marginHorizontal: 5,
         marginTop: 10,
         paddingBottom: 10,
@@ -417,6 +431,7 @@ const styles = StyleSheet.create({
         borderColor: 'grey'
     },
     title: {
+        maxWidth: width / 2,
         fontSize: 16,
         color: 'black',
         fontWeight: 'bold'
@@ -424,10 +439,33 @@ const styles = StyleSheet.create({
     singer: {
         fontSize: 14,
         color: 'black',
+        minWidth: 60,
         flex: 1
     },
     listen: {
         fontSize: 14,
         color: 'black'
+    },
+    err: {
+        height: 40,
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+        left: (width - 80) / 2,
+        position: 'absolute',
+        top: 105
+    },
+    textErr: {
+        color: 'white',
+        fontSize: 14
+    },
+    load: {
+        backgroundColor: 'rgba(255,255,255,.5)',
+        height: 5
+    },
+    play: {
+        backgroundColor: '#009ef8'
+        , height: 5,
+        position: 'absolute'
     }
 })

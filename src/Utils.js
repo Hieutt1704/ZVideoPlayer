@@ -25,13 +25,13 @@ function isIphoneX() {
 
 function getStatusBarHeight() {
     return Platform.select({
-        ios: isIphoneX() ? 30 : 20,
+        ios: isIphoneX() ? 44 : 20,
         android: 0
     })
 }
 
 function getBottomSpace(value) {
-    return isIphoneX() ? 34 : value || 0
+    return isIphoneX() ? 40 : value || 0
 }
 
 const scale = size => deviceW / guidelineBaseWidth * size
@@ -50,12 +50,7 @@ function findAllLetter(source, find) {
 }
 
 function filterHtml(start_letter, end_letter, html) {
-    // html = html.replace(/[&]nbsp[;]/gi, " ")
-    // html = html.replace(/[<]br[^>]*[>]/gi, "")
     html = html.replace(/\n/ig, '')
-    // html = html.replace('  ', '')
-    // console.log(html)
-    // console.log('HTML',html.length)
     let startArr = findAllLetter(html, start_letter)
     let endArr = findAllLetter(html, end_letter)
     let videos = []
@@ -72,7 +67,6 @@ function filterHtml(start_letter, end_letter, html) {
             }
             if (j != 0 && endArr[j - 1] < s && s < e) {// s {...} e dung lien nhau 
                 const item = html.slice(s + slength, e - elength)
-                // console.log(html.length, s + slength, e - elength, length, item.length, item)
                 videos.push(item)
             }
         })

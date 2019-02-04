@@ -13,5 +13,9 @@ export const prevous = <Icon name={'skip-previous-circle-outline'} size={px2dp(1
 export const zoom_in = <IconF name={'expand'} size={px2dp(18)} color='#009ef8' />
 export const zoom_out = <IconF name={'compress'} size={px2dp(18)} color='#009ef8' />
 export const headphones = (size, color) => <Icon name={'headphones'} size={px2dp(size)} color={color} />
+export const alert_outline = (size, color) => <Icon name={'alert-outline'} size={px2dp(size)} color={color} />
+export const volume_on = <Icon name={'volume-high'} size={px2dp(18)} color='#009ef8' />
+export const volume_off = <Icon name={'volume-off'} size={px2dp(18)} color='#009ef8' />
+
 //video
 export const anh_yeu_em = require('./assets/anh_yeu_em.mp4')
