@@ -125,17 +125,17 @@ export default class ZVideo extends Component {
     }
 
     _getVideo(url) {
-        if (this.player)
-            this.player.seek(0)
         let not_found = true
+        if (this.player && this.state.isEnd)
+            this.player.seek(0)
         data.map(e => {
             if (e.html == url) {
-                this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, video: e.video })
+                this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, duration: 0, video: e.video })
                 not_found = false
             }
         })
         if (not_found)
-            this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, video: '', duration: 0 })
+            this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, duration: 0, video: '' })
         this.setState({ not_found })
         this._timeOut()
     }
@@ -167,12 +167,14 @@ export default class ZVideo extends Component {
         this.setState({
             paused: !paused
         })
+        this._timeOut()
     }
 
     _toggleProgress(e, widthProgress) {
-        if (this.state.not_found) return
+        const { duration, not_found } = this.state
+        if (not_found || duration == 0) return
         const position = e.nativeEvent.locationX
-        const progress = (position / widthProgress) * this.state.duration
+        const progress = (position / widthProgress) * duration
         this.player.seek(progress)
         this.setState({ progress: (position / widthProgress), isEnd: false })
         this._timeOut()
@@ -187,15 +189,17 @@ export default class ZVideo extends Component {
 
     _toggleNext() {
         this.props.onNext()
+        this._timeOut()
     }
 
     _togglePrevous() {
         this.props.onPrevous()
+        this._timeOut()
     }
 
     _setProgress(progress) {
-        if (this.state.not_found) return
-        const { duration } = this.state
+        const { duration, not_found } = this.state
+        if (not_found || !duration) return
         this.setState({
             progress: progress.currentTime / duration,
             playable: progress.playableDuration / duration
@@ -203,13 +207,10 @@ export default class ZVideo extends Component {
     }
 
     _setEnd() {
-        this.setState({ paused: true, isControls: true, isEnd: true }, () => {
-            clearTimeout(this.lastTimeout)
-        })
+        this.setState({ paused: true, isControls: true, isEnd: true })
     }
 
     _getDuration(meta) {
-        if (this.state.not_found) return
         this.setState({
             duration: meta.duration,
         })
@@ -235,7 +236,7 @@ export default class ZVideo extends Component {
         // console.log(isEnd)
         const viewMidControll = !not_found ?
             !isEnd ?
-                progress >= playable ?
+                progress >= playable || duration == 0 ?
                     <View style={styles.err}>
                         <ActivityIndicator size={"large"} color={'#009ef8'} animating={true} />
                     </View> :

@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar } from 'react-native'
 
 import ZVideo from './src/Component/Video'
 import ItemMV from './src/Component/ItemMV'
@@ -114,6 +114,7 @@ class App extends React.Component {
             const newVideos = videos.concat(cutVideos)
             this.setState({ videos: newVideos })
         }
+        this._scrollToTop()
     }
 
     _onNext() {
@@ -122,6 +123,7 @@ class App extends React.Component {
         const cutVideos = videos.splice(0, 1)
         const newVideos = videos.concat(cutVideos)
         this.setState({ videos: newVideos })
+        this._scrollToTop()
     }
 
     _onPrevous() {
@@ -130,6 +132,12 @@ class App extends React.Component {
         const cutVideos = videos.splice(videos.length - 1, 1)
         const newVideos = cutVideos.concat(videos)
         this.setState({ videos: newVideos })
+        this._scrollToTop()
+    }
+
+    _scrollToTop() {
+        if (this.FlatList)
+            this.FlatList.scrollToOffset({ animated: true, offset: 0 })
     }
 
     render() {
@@ -141,6 +149,12 @@ class App extends React.Component {
             </View> : null
         return (
             <View style={styles.supperContainer}>
+
+                <StatusBar
+                    barStyle={'light-content'}
+                    backgroundColor='#009ef8'
+                />
+
                 {load_center ? vLoad : err ?
                     <View style={styles.container}>
                         <TouchableOpacity
@@ -163,6 +177,7 @@ class App extends React.Component {
                         />
 
                         <FlatList
+                            ref={ref => this.FlatList = ref}
                             refreshing={is_refresh}
                             onRefresh={this._onRefresh}
                             data={videos}
@@ -193,7 +208,7 @@ const styles = StyleSheet.create({
     supperContainer: {
         flex: 1,
         backgroundColor: '#009ef8',
-        paddingTop: 20 + getStatusBarHeight(),
+        paddingTop: getStatusBarHeight(),
         // paddingBottom: 20 + getBottomSpace(),
     },
     container: {

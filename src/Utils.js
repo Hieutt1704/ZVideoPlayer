@@ -25,7 +25,7 @@ function isIphoneX() {
 
 function getStatusBarHeight() {
     return Platform.select({
-        ios: isIphoneX() ? 44 : 20,
+        ios: isIphoneX() ? 64 : 40,
         android: 0
     })
 }
