@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing, Platform } from 'react-native'
 
-import data from '../assets/data'
+import data from '../assets/data01'
 import Video from 'react-native-video'
-import { secondsToTime, fixNumber, getStatusBarHeight, getBottomSpace, isIphoneX } from '../Utils'
 import * as Progress from 'react-native-progress'
 import {
     next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay,
     skip_next, headphones, alert_outline, volume_off, volume_on
 } from '../IconManager'
+import { secondsToTime, fixNumber, getStatusBarHeight, getBottomSpace, isIphoneX } from '../Utils'
 
 const { width, height } = Dimensions.get('window')
 
