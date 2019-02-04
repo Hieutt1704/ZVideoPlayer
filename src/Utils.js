@@ -32,7 +32,7 @@ function getStatusBarHeight() {
 }
 
 function getBottomSpace(value) {
-    return isIphoneX() ? 40 : value || 0
+    return isIphoneX() ? 30 : value || 0
 }
 
 const scale = size => deviceW / guidelineBaseWidth * size

@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing } from 'react-native'
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing, Platform } from 'react-native'
 
 import data from '../assets/data'
 import Video from 'react-native-video'
-import { secondsToTime, fixNumber, getStatusBarHeight } from '../Utils'
+import { secondsToTime, fixNumber, getStatusBarHeight, getBottomSpace, isIphoneX } from '../Utils'
 import * as Progress from 'react-native-progress'
 import {
     next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay,
@@ -195,6 +195,7 @@ export default class ZVideo extends Component {
             toValue: isFullscreen ? 0 : 1,
             duration: 500,
             easing: Easing.linear,
+            useNativeDriver: true,
         }).start()
     }
 
@@ -251,7 +252,7 @@ export default class ZVideo extends Component {
         const iconVolumeOff = isFullscreen ? volume_off(30) : volume_off(18)
         const styleControl = isFullscreen ? styles.fullControls : styles.controls
         const heightProgress = isFullscreen ? 10 : 5
-        const widthProgress = isFullscreen ? height : width
+        const widthProgress = isFullscreen ? height - getStatusBarHeight() - getBottomSpace(10) : width
         const sizeDuration = isFullscreen ? 16 : 12
         const styleMid = isFullscreen ? styles.fullErr : styles.err
         //animation
@@ -312,7 +313,7 @@ export default class ZVideo extends Component {
                 {/* ========================== CONTROLL ========================= */}
 
                 {isControls ?
-                    <View style={{ position: 'absolute', flexDirection: 'row', alignItems: 'center', width: height - 50 }}>
+                    <View style={styles.header}>
                         <TouchableOpacity
                             onPress={() => this.setState({ muted: !muted })}
                             activeOpacity={0.7}
@@ -322,12 +323,13 @@ export default class ZVideo extends Component {
                         </TouchableOpacity>
 
                         {isFullscreen ?
-                            <View style={{ flexDirection: "row", alignItems: 'center', flex: 1 }}>
-                                <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }} ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
-                                <Text style={{ fontSize: 16, color: 'white' }}>Khắc Việt</Text>
+                            <View style={styles.info}>
+                                <Text style={[styles.fullTitle, { fontWeight: 'bold' }]}
+                                    ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
+                                <Text style={styles.fullTitle}>Khắc Việt</Text>
                                 <View style={{ flex: 1 }} />
                                 {headphones(25, 'white')}
-                                <Text style={{ fontSize: 16, color: 'white' }}> {listen}</Text>
+                                <Text style={styles.fullTitle}> {listen}</Text>
                             </View>
                             : null
                         }
@@ -524,6 +526,7 @@ const styles = StyleSheet.create({
     fullVideo: {
         width: height - getStatusBarHeight(),
         height: width + 2,
+        backgroundColor: '#000007'
     },
     fullPlayer: {
         width: height - getStatusBarHeight(),
@@ -532,7 +535,7 @@ const styles = StyleSheet.create({
     },
     fullIcon: {
         height: 40,
-        width: 45,
+        width: 50,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -562,6 +565,22 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 7,
         left: 7
+    },
+    header: {
+        position: 'absolute',
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: height - (isIphoneX() ? 70 : 30),
+        paddingLeft: Platform.OS !== 'ios' ? 10 : 0,
+    },
+    info: {
+        flexDirection: "row",
+        alignItems: 'center',
+        flex: 1
+    },
+    fullTitle: {
+        fontSize: 16,
+        color: 'white'
     },
 })
 
