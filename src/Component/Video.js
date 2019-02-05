@@ -252,7 +252,7 @@ export default class ZVideo extends Component {
         const iconVolumeOff = isFullscreen ? volume_off(30) : volume_off(18)
         const styleControl = isFullscreen ? styles.fullControls : styles.controls
         const heightProgress = isFullscreen ? 10 : 5
-        const widthProgress = isFullscreen ? height - getStatusBarHeight() - getBottomSpace(10) : width
+        const widthProgress = isFullscreen ? height - getStatusBarHeight() : width
         const sizeDuration = isFullscreen ? 16 : 12
         const styleMid = isFullscreen ? styles.fullErr : styles.err
         //animation

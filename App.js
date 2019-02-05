@@ -4,6 +4,7 @@ import { View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, 
 import ZVideo from './src/Component/Video'
 import ItemMV from './src/Component/ItemMV'
 import { alert_outline } from './src/IconManager'
+import SplashScreen from 'react-native-splash-screen'
 import { filterHtml, getStatusBarHeight } from './src/Utils'
 import {
     baseUrl, startUrlItem, endUrlItem, startUrlHref, endUrlHref, startUrlTitle, endUrlTitle,
@@ -32,6 +33,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        SplashScreen.hide()
         this.setState({ load_center: true }, () => {
             this._getVideos()
                 .then(res => {

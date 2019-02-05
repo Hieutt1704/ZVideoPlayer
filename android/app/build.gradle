@@ -139,6 +139,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-splash-screen')
     // implementation 'com.google.guava:guava:27.0.1-android'
     implementation project(':react-native-video')
     implementation project(':react-native-vector-icons')
