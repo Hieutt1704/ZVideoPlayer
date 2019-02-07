@@ -137,7 +137,6 @@ export default class ZVideo extends Component {
         if (this.player && this.state.isEnd)
             this.player.seek(0)
         getVideo(id_video).then(res => {
-            console.log(res, res.data._55.request.files.progressive[0].url)
             if (res.success)
                 this.setState({
                     not_found: false, isEnd: false, paused: false, progress: 0,

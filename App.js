@@ -1,5 +1,7 @@
 import React from 'react'
-import { View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar, Keyboard } from 'react-native'
+import {
+    View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar, Keyboard, Platform
+} from 'react-native'
 
 import ZVideo from './src/Component/Video'
 import { getStatusBarHeight, scale } from './src/Utils'
@@ -68,7 +70,7 @@ class App extends React.Component {
     _getVideos() {
         return this._getData(1)
             .then(res => {
-                console.log(res)
+                // console.log(res)
                 if (res.success)
                     this.setState({
                         videos: res.data,
@@ -151,9 +153,12 @@ class App extends React.Component {
 
     _onSearch(key) {
         Keyboard.dismiss()
-        this.setState({ type: 'search', keysearch: key, is_search: true }, () => {
-            this._getVideos().then(res => this.setState({ is_search: false }))
-        })
+        if (Platform.OS != 'ios')
+            alert('Comming soon on android')
+        else
+            this.setState({ type: 'search', keysearch: key, is_search: true }, () => {
+                this._getVideos().then(res => this.setState({ is_search: false }))
+            })
     }
 
     render() {

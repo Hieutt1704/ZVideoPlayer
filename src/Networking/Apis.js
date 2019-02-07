@@ -29,7 +29,6 @@ function request(api, type) {
                         data: filterHtml(startUrlItem, endUrlItem, resp.text()._55)
                             .filter(item => { if (item) return item })
                             .map(e => {
-                                // console.log(e)
                                 const id_video = filterHtml(startUrlHref, endUrlHref, e)[0]
                                 const title = filterHtml(startUrlTitle, endUrlTitle, e)[0]
                                 const author = filterHtml(startUrlAuthor, endUrlAuthor, e)[0]
