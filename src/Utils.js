@@ -5,6 +5,8 @@ const basePx = 375
 const guidelineBaseWidth = 350
 // const guidelineBaseHeight = 680
 
+const scale = size => deviceW / guidelineBaseWidth * size
+
 function px2dp(px) {
     return px * deviceW / basePx
 }
@@ -26,16 +28,15 @@ function isIphoneX() {
 
 function getStatusBarHeight() {
     return Platform.select({
-        ios: isIphoneX() ? 40 : 20,
+        ios: isIphoneX() ? scale(40) : scale(20),
         android: 0
     })
 }
 
 function getBottomSpace(value) {
-    return isIphoneX() ? 30 : value || 0
+    return isIphoneX() ? scale(30) : value || 0
 }
 
-const scale = size => deviceW / guidelineBaseWidth * size
 
 function findAllLetter(source, find) {
     var result = []

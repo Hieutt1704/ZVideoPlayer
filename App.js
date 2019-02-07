@@ -1,8 +1,8 @@
 import React from 'react'
-import { View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar } from 'react-native'
+import { View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar, Keyboard } from 'react-native'
 
 import ZVideo from './src/Component/Video'
-import { getStatusBarHeight } from './src/Utils'
+import { getStatusBarHeight, scale } from './src/Utils'
 import { alert_outline, home } from './src/IconManager'
 import SplashScreen from 'react-native-splash-screen'
 import { ItemMV, SearchBar } from './src/Views/ViewManager'
@@ -35,10 +35,13 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        setTimeout(() => {
+            SplashScreen.hide()
+        }, 1000)
+
         this.setState({ load_center: true }, () => {
             this._getVideos()
                 .then(res => {
-                    SplashScreen.hide()
                     if (!res.success)
                         setTimeout(() => {
                             this.setState({ err: true, load_center: false })
@@ -65,7 +68,7 @@ class App extends React.Component {
     _getVideos() {
         return this._getData(1)
             .then(res => {
-                // console.log(res)
+                console.log(res)
                 if (res.success)
                     this.setState({
                         videos: res.data,
@@ -140,12 +143,14 @@ class App extends React.Component {
     }
 
     _goHome() {
+        Keyboard.dismiss()
         this.setState({ type: 'home', is_search: true }, () => {
             this._getVideos().then(res => this.setState({ is_search: false }))
         })
     }
 
     _onSearch(key) {
+        Keyboard.dismiss()
         this.setState({ type: 'search', keysearch: key, is_search: true }, () => {
             this._getVideos().then(res => this.setState({ is_search: false }))
         })
@@ -158,7 +163,7 @@ class App extends React.Component {
                 <ActivityIndicator size={"large"} color={'#009ef8'} animating={true} />
             </View> : null
         return (
-            <View style={styles.supperContainer}>
+            <TouchableOpacity style={styles.supperContainer} onPress={() => Keyboard.dismiss()} activeOpacity={1}>
 
                 <StatusBar
                     barStyle={'light-content'}
@@ -172,17 +177,20 @@ class App extends React.Component {
                             style={styles.buttonErr}
                             onPress={() => this.componentDidMount()}
                         >
-                            {alert_outline(40, 'grey')}
+                            {alert_outline(scale(40), 'grey')}
                             <Text style={styles.fail}>Opps, something went wrong!</Text>
                         </TouchableOpacity>
                     </View>
                     :
                     < View style={styles.container}>
 
-                        <SearchBar
-                            goHome={this._goHome}
-                            onSearch={this._onSearch}
-                        />
+                        {!isFullscreen ?
+                            <SearchBar
+                                goHome={this._goHome}
+                                onSearch={this._onSearch}
+                            />
+                            : null
+                        }
 
                         <ZVideo
                             ref={ref => this.ZVideo = ref}
@@ -197,7 +205,7 @@ class App extends React.Component {
                                 vLoad
                                 : videos.length == 0 ?
                                     <View style={styles.container}>
-                                        <Text style={styles.fail}>0 results for {keysearch}.</Text>
+                                        <Text style={styles.fail}>0 results for "{keysearch}".</Text>
                                         <Text style={styles.fail}>Try searching again using broader keywords.</Text>
                                     </View>
                                     :
@@ -224,7 +232,7 @@ class App extends React.Component {
 
                     </View>
                 }
-            </View>
+            </TouchableOpacity>
         )
     }
 }
@@ -248,12 +256,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'white',
-        paddingHorizontal: 10,
-        paddingVertical: 10
+        paddingHorizontal: scale(10),
+        paddingVertical: scale(10)
     },
     buttonErr: {
-        height: 80,
-        width: 220,
+        height: scale(80),
+        width: scale(220),
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'white',
@@ -264,6 +272,6 @@ const styles = StyleSheet.create({
     },
     fail: {
         color: 'grey',
-        fontSize: 14,
+        fontSize: scale(14),
     },
 })

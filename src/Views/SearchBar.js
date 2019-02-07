@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, Dimensions, Platform, TextInput } from 'react-native'
 
 import { clear, search, home } from '../IconManager'
+import { scale } from '../Utils';
 
 class SearchBar extends Component {
 
@@ -25,14 +26,14 @@ class SearchBar extends Component {
         const { keyword } = this.state
         const { goHome } = this.props
         return (
-            <View style={styles.container}>
+            <View style={styles.container} >
 
                 <TouchableOpacity
                     style={styles.viewButton}
                     activeOpacity={0.7}
                     onPress={() => goHome()}
                 >
-                    {home(30)}
+                    {home(scale(30))}
                 </TouchableOpacity>
 
                 <View style={styles.viewSearch}>
@@ -46,7 +47,7 @@ class SearchBar extends Component {
                         placeholderTextColor='#DBDBDB'
                         onChangeText={text => this.setState({ keyword: text })}
                         returnKeyType={'go'}
-                        placeholder={'search'}
+                        placeholder={'Search videos, people, and more...'}
                         onSubmitEditing={this._onSearch}
                         keyboardType={'default'}
                         autoCorrect={false}
@@ -60,7 +61,7 @@ class SearchBar extends Component {
                             activeOpacity={0.7}
                             onPress={() => this.setState({ keyword: '' })}
                         >
-                            {clear(18)}
+                            {clear(scale(18))}
                         </TouchableOpacity>
                         : null
                     }
@@ -88,13 +89,13 @@ const styles = StyleSheet.create({
         // backgroundColor: 'red',
         backgroundColor: '#009ef8',
         width: Dimensions.get('window').width,
-        height: 40,
-        paddingHorizontal: Platform.OS === 'ios' ? 0 : 7,
+        height: scale(40),
+        paddingHorizontal: Platform.OS === 'ios' ? 0 : scale(7),
         alignItems: 'center',
-        paddingBottom: 5
+        paddingBottom: scale(5)
     },
     viewButton: {
-        width: 40,
+        width: scale(40),
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         // marginLeft: 10,
-        height: Platform.OS === 'ios' ? 30 : 40,
+        height: Platform.OS === 'ios' ? scale(30) : scale(40),
         alignItems: 'center',
         borderBottomWidth: 0.5,
         borderColor: '#DBDBDB',
@@ -110,14 +111,14 @@ const styles = StyleSheet.create({
     search: {
         flex: 1,
         color: 'white',
-        fontSize: 16,
+        fontSize: scale(14),
     },
     clear: {
-        height: 12,
-        width: 12
+        height: scale(12),
+        width: scale(12)
     },
     icon: {
-        height: 20,
-        width: 20
+        height: scale(20),
+        width: scale(20)
     }
 })

@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Image, Dimensions, Text, StyleSheet, TouchableOpacity } from 'react-native'
 
-import { fixNumber } from '../Utils'
+import { fixNumber, scale } from '../Utils'
 import { headphones } from '../IconManager'
 
 const { height, width } = Dimensions.get('window')
@@ -35,35 +35,35 @@ export default ItemMV
 
 const styles = StyleSheet.create({
     container: {
-        width: width / 2 - 10,
-        margin: 5,
+        width: width / 2 - scale(10),
+        margin: scale(5),
     },
     image: {
         width: '100%',
-        height: 120,
+        height: scale(120),
         backgroundColor: '#D6D6D6'
     },
     viewTotal: {
         flexDirection: 'row',
         alignItems: 'center',
         position: 'absolute',
-        height: 30,
+        height: scale(30),
         width: '100%',
-        top: 95,
+        top: scale(95),
         left: 0
     },
     total: {
-        fontSize: 12,
+        fontSize: scale(12),
         color: 'white'
     },
     song: {
-        fontSize: 14,
+        fontSize: scale(14),
         color: 'black',
         fontWeight: 'bold',
-        marginVertical: 5
+        marginVertical: scale(5)
     },
     singer: {
-        fontSize: 12,
+        fontSize: scale(12),
         color: 'grey'
     }
 })

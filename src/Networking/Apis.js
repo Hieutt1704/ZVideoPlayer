@@ -1,35 +1,53 @@
+import { Platform } from 'react-native'
 import { filterHtml } from '../Utils'
 import {
     startUrlItem, endUrlItem, startUrlHref, endUrlHref, startUrlTitle, endUrlTitle, startUrlImage, endUrlImage,
-    startUrlTime, endUrlTime, endUrlListen, startUrlListen, startUrlAuthor, endUrlAuthor
+    startUrlTime, endUrlTime, endUrlListen, startUrlListen, startUrlAuthor, endUrlAuthor, startUrlAndroid, endUrlAndroid
 } from './Const'
 
 function request(api, type) {
     return fetch(api).then((resp) => {
+        // console.log(resp)
         if (resp.ok) {
             if (type == 'html') {
-                // console.log(resp, api, type)
-                return {
-                    data: filterHtml(startUrlItem, endUrlItem, resp.text()._55)
-                        .filter(item => { if (item) return item })
-                        .map(e => {
-                            // console.log(e)
-                            const id_video = filterHtml(startUrlHref, endUrlHref, e)[0]
-                            const title = filterHtml(startUrlTitle, endUrlTitle, e)[0]
-                            const author = filterHtml(startUrlAuthor, endUrlAuthor, e)[0]
-                            const image = filterHtml(startUrlImage, endUrlImage, e)[0]
-                            const total_time = filterHtml(startUrlTime, endUrlTime, e)[0]
-                            const total_listen = filterHtml(startUrlListen, endUrlListen, e)[0]
-                            return { title, author, id_video, total_time, total_listen, image }
+                if (Platform.OS !== 'ios')
+                    return {
+                        data: JSON.parse(filterHtml(startUrlAndroid, endUrlAndroid, resp.text()._55)).profile.initial_state.clips.map(e => {
+                            return {
+                                title: e.title,
+                                author: e.user.name,
+                                id_video: e.clip_id,
+                                total_time: e.duration.formatted,
+                                total_listen: e.total_plays ? e.total_plays.formatted : 0,
+                                image: e.thumbnail.src_8x
+                            }
                         }),
-                    success: true
-                }
+                        success: true
+                    }
+                else
+                    return {
+                        data: filterHtml(startUrlItem, endUrlItem, resp.text()._55)
+                            .filter(item => { if (item) return item })
+                            .map(e => {
+                                // console.log(e)
+                                const id_video = filterHtml(startUrlHref, endUrlHref, e)[0]
+                                const title = filterHtml(startUrlTitle, endUrlTitle, e)[0]
+                                const author = filterHtml(startUrlAuthor, endUrlAuthor, e)[0]
+                                const image = filterHtml(startUrlImage, endUrlImage, e)[0]
+                                const total_time = filterHtml(startUrlTime, endUrlTime, e)[0]
+                                const total_listen = filterHtml(startUrlListen, endUrlListen, e)[0]
+                                return { title, author, id_video, total_time, total_listen, image }
+                            }),
+                        success: true
+                    }
             }
-            else
+            else {
+                // console.log(resp.json())
                 return {
                     data: resp.json(),
                     success: true
                 }
+            }
         }
         return { success: false }
     }).catch(err => { return { success: false } })

@@ -18,3 +18,6 @@ export const endUrlListen = ' plays | <time datetime'
 
 export const startUrlAuthor = '<p>from '
 export const endUrlAuthor = '</p>        <i>'
+
+export const startUrlAndroid = 'vimeo.config = _extend((vimeo.config || {}), '
+export const endUrlAndroid = ");        var __i18nLocale = 'en';"

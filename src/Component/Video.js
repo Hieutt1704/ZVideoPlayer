@@ -1,13 +1,15 @@
 import React, { Component } from 'react'
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing, Platform } from 'react-native'
+import {
+    Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing, Platform, Keyboard
+} from 'react-native'
 
 import Video from 'react-native-video'
 import * as Progress from 'react-native-progress'
 import {
     next, pause, play, prevous, zoom_in, zoom_out, replay,
-    skip_next, headphones, alert_outline, volume_off, volume_on
+    skip_next, headphones, alert_outline, volume_off, volume_on, anh_yeu_em
 } from '../IconManager'
-import { secondsToTime, fixNumber, getStatusBarHeight, isIphoneX } from '../Utils'
+import { secondsToTime, fixNumber, getStatusBarHeight, isIphoneX, scale } from '../Utils'
 import { getVideo } from '../Networking/Apis';
 
 const { width, height } = Dimensions.get('window')
@@ -59,7 +61,7 @@ class ProgressCircle extends Component {
     render() {
         const { parentState } = this.props
         const style = parentState.isFullscreen ? styles.fullMidControls : styles.midControls
-        const size = parentState.isFullscreen ? 60 : 40
+        const size = parentState.isFullscreen ? scale(60) : scale(40)
         const styleNext = parentState.isFullscreen ? styles.fullNext : styles.skipNext
         const iconNext = parentState.isFullscreen ? skip_next(45) : skip_next(30)
         return (
@@ -135,7 +137,7 @@ export default class ZVideo extends Component {
         if (this.player && this.state.isEnd)
             this.player.seek(0)
         getVideo(id_video).then(res => {
-            // console.log(res)
+            console.log(res, res.data._55.request.files.progressive[0].url)
             if (res.success)
                 this.setState({
                     not_found: false, isEnd: false, paused: false, progress: 0,
@@ -157,6 +159,7 @@ export default class ZVideo extends Component {
     }
 
     _toggleShow() {
+        Keyboard.dismiss()
         const { lastScreenPress } = this.state
         const time = new Date().getTime()
         const delta = time - lastScreenPress
@@ -237,6 +240,7 @@ export default class ZVideo extends Component {
         const { item } = this.props
         const { progress, isControls, isEnd, video, muted, playable, isFullscreen,
             paused, isPrevous, isNext, duration, not_found } = this.state
+        // console.log('????', video)
         const title = item ? item.title : ''
         const listen = item.total_listen ? fixNumber(item.total_listen) : 0
         //Fullscreen
@@ -253,9 +257,9 @@ export default class ZVideo extends Component {
         const iconVolumeOn = isFullscreen ? volume_on(30) : volume_on(18)
         const iconVolumeOff = isFullscreen ? volume_off(30) : volume_off(18)
         const styleControl = isFullscreen ? styles.fullControls : styles.controls
-        const heightProgress = isFullscreen ? 10 : 5
+        const heightProgress = isFullscreen ? scale(10) : scale(5)
         const widthProgress = isFullscreen ? height - getStatusBarHeight() : width
-        const sizeDuration = isFullscreen ? 16 : 12
+        const sizeDuration = isFullscreen ? scale(16) : scale(12)
         const styleMid = isFullscreen ? styles.fullErr : styles.err
         //animation
         const rotate = this.state.rotate.interpolate({
@@ -302,6 +306,7 @@ export default class ZVideo extends Component {
                         muted={muted}
                         paused={paused}
                         source={{ uri: video ? video : 'https://' }}
+                        // source={anh_yeu_em}
                         resizeMode={'contain'}
                         style={stylePlayer}
                         onLoad={this._getDuration}
@@ -347,15 +352,15 @@ export default class ZVideo extends Component {
                     <View style={styleControl}>
 
                         <TouchableOpacity
-                            onPress={(e) => this._toggleProgress(e, widthProgress - 20)}
+                            onPress={(e) => this._toggleProgress(e, widthProgress - scale(20))}
                             activeOpacity={1}
                             style={[styles.progress, { height: heightProgress }]}
                         >
-                            <View style={[{ width: playable * (widthProgress - 20), height: heightProgress }, styles.load]} />
-                            <View style={[{ width: progress * (widthProgress - 20), height: heightProgress }, styles.play]} />
+                            <View style={[{ width: playable * (widthProgress - scale(20)), height: heightProgress }, styles.load]} />
+                            <View style={[{ width: progress * (widthProgress - scale(20)), height: heightProgress }, styles.play]} />
                         </TouchableOpacity>
 
-                        <View style={[styles.child, { marginHorizontal: isFullscreen ? 10 : 5 }]}>
+                        <View style={[styles.child, { marginHorizontal: isFullscreen ? scale(10) : scale(5) }]}>
 
                             {viewPrevous}
 
@@ -415,98 +420,98 @@ const styles = StyleSheet.create({
     },
     video: {
         width,
-        height: 250,
+        height: scale(250),
         backgroundColor: '#000007'
     },
     player: {
         width,
-        height: 250
+        height: scale(250)
     },
     midControls: {
         position: 'absolute',
-        left: (width - 40) / 2,
-        top: 105
+        left: (width - scale(40)) / 2,
+        top: scale(105)
     },
     skipNext: {
         position: 'absolute',
-        top: 5,
-        left: 5
+        top: scale(5),
+        left: scale(5)
     },
     controls: {
         backgroundColor: 'rgba(0, 0, 0, 0)',
-        height: 40,
+        height: scale(40),
         left: 0,
         right: 0,
-        top: 210,
+        top: scale(210),
         position: 'absolute',
     },
     progress: {
         backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        height: 5,
-        marginHorizontal: 10
+        height: scale(5),
+        marginHorizontal: scale(10)
     },
     child: {
         flexDirection: 'row',
         alignItems: 'center',
         // marginHorizontal: 5,
         justifyContent: 'center',
-        marginTop: 2,
+        marginTop: scale(2),
     },
     duration: {
         color: '#009ef8',
-        fontSize: 12,
+        fontSize: scale(12),
     },
     icon: {
-        height: 15,
-        width: 15
+        height: scale(15),
+        width: scale(15)
     },
     iconButton: {
-        height: 30,
-        width: 35,
+        height: scale(30),
+        width: scale(35),
         justifyContent: 'center',
         alignItems: 'center'
     },
     viewTitle: {
         // flex: 1,
-        width: width - 10,
+        width: width - scale(10),
         flexDirection: 'row',
         alignItems: 'center',
         alignContent: 'stretch',
-        marginHorizontal: 5,
-        marginTop: 10,
-        paddingBottom: 10,
-        marginBottom: 5,
+        marginHorizontal: scale(5),
+        marginTop: scale(10),
+        paddingBottom: scale(10),
+        marginBottom: scale(5),
         borderBottomWidth: 0.5,
         borderColor: 'grey'
     },
     title: {
         maxWidth: width / 2,
-        fontSize: 16,
+        fontSize: scale(16),
         color: 'black',
         fontWeight: 'bold'
     },
     singer: {
-        fontSize: 14,
+        fontSize: scale(14),
         color: 'black',
-        minWidth: 60,
+        minWidth: scale(60),
         flex: 1
     },
     listen: {
-        fontSize: 14,
+        fontSize: scale(14),
         color: 'black'
     },
     err: {
-        height: 40,
-        width: 80,
+        height: scale(40),
+        width: scale(80),
         alignItems: 'center',
         justifyContent: 'center',
-        left: (width - 80) / 2,
+        left: (width - scale(80)) / 2,
         position: 'absolute',
-        top: 105
+        top: scale(105)
     },
     textErr: {
         color: 'white',
-        fontSize: 14
+        fontSize: scale(14)
     },
     load: {
         backgroundColor: 'rgba(255,255,255,.5)',
@@ -518,8 +523,8 @@ const styles = StyleSheet.create({
         position: 'absolute'
     },
     volume: {
-        height: 30,
-        width: 35,
+        height: scale(30),
+        width: scale(35),
         justifyContent: 'center',
         alignItems: 'center',
         position: 'absolute',
@@ -527,54 +532,54 @@ const styles = StyleSheet.create({
     //Fullscreen
     fullVideo: {
         width: height - getStatusBarHeight(),
-        height: width + 2,
+        height: width + scale(2),
         backgroundColor: '#000007'
     },
     fullPlayer: {
         width: height - getStatusBarHeight(),
-        height: width + 2,
+        height: width + scale(2),
         backgroundColor: '#000007',
     },
     fullIcon: {
-        marginTop: 5,
-        height: 30,
-        width: 50,
+        marginTop: scale(5),
+        height: scale(30),
+        width: scale(50),
         justifyContent: 'center',
         alignItems: 'center',
     },
     fullControls: {
         backgroundColor: 'rgba(0, 0, 0, 0)',
-        height: 50,
+        height: scale(50),
         left: 0,
         right: 0,
-        top: width - 50,
+        top: width - scale(50),
         position: 'absolute',
     },
     fullErr: {
-        height: 40,
-        width: 80,
+        height: scale(40),
+        width: scale(80),
         alignItems: 'center',
         justifyContent: 'center',
-        left: (height - 80) / 2,
+        left: (height - scale(80)) / 2,
         position: 'absolute',
-        top: (width - 50) / 2,
+        top: (width - scale(50)) / 2,
     },
     fullMidControls: {
         position: 'absolute',
-        left: (height - 60) / 2,
-        top: (width - 60) / 2,
+        left: (height - scale(60)) / 2,
+        top: (width - scale(60)) / 2,
     },
     fullNext: {
         position: 'absolute',
-        top: 7,
-        left: 7
+        top: scale(7),
+        left: scale(7)
     },
     header: {
         position: 'absolute',
         flexDirection: 'row',
         alignItems: 'center',
-        width: height - (isIphoneX() ? 70 : 30),
-        paddingLeft: Platform.OS !== 'ios' ? 10 : 0,
+        width: height - (isIphoneX() ? scale(70) : scale(30)),
+        paddingLeft: Platform.OS !== 'ios' ? scale(10) : 0,
     },
     info: {
         flexDirection: "row",
@@ -582,7 +587,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     fullTitle: {
-        fontSize: 16,
+        fontSize: scale(16),
         color: 'white'
     },
 })
