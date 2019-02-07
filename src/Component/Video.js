@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing, Platform } from 'react-native'
 
-import data from '../assets/data01'
 import Video from 'react-native-video'
 import * as Progress from 'react-native-progress'
 import {
-    next, pause, play, prevous, zoom_in, zoom_out, anh_yeu_em, replay,
+    next, pause, play, prevous, zoom_in, zoom_out, replay,
     skip_next, headphones, alert_outline, volume_off, volume_on
 } from '../IconManager'
-import { secondsToTime, fixNumber, getStatusBarHeight, getBottomSpace, isIphoneX } from '../Utils'
+import { secondsToTime, fixNumber, getStatusBarHeight, isIphoneX } from '../Utils'
+import { getVideo } from '../Networking/Apis';
 
 const { width, height } = Dimensions.get('window')
 
@@ -19,7 +19,6 @@ class ProgressCircle extends Component {
             progress: 0,
         }
     }
-
 
     componentDidMount() {
         this.animate()
@@ -100,7 +99,8 @@ export default class ZVideo extends Component {
             isVisible: false,
             muted: false,
             isFullscreen: false,
-            rotate: new Animated.Value(0)
+            rotate: new Animated.Value(0),
+
         }
         this._timeOut = this._timeOut.bind(this)
         this._toggleShow = this._toggleShow.bind(this)
@@ -121,29 +121,31 @@ export default class ZVideo extends Component {
                 isVisible: true,
             })
         })
-        this._getVideo(item.href)
+        this._getVideo(item.id_video)
     }
 
     componentDidUpdate(nextProps, nextState) {
         const { item } = this.props
         const prevItem = nextProps.item
-        if (item.href != prevItem.href && item.href)
-            this._getVideo(item.href)
+        if (item.id_video != prevItem.id_video)
+            this._getVideo(item.id_video)
     }
 
-    _getVideo(url) {
-        let not_found = true
+    _getVideo(id_video) {
         if (this.player && this.state.isEnd)
             this.player.seek(0)
-        data.map(e => {
-            if (e.html == url) {
-                this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, duration: 0, video: e.video })
-                not_found = false
-            }
+        getVideo(id_video).then(res => {
+            // console.log(res)
+            if (res.success)
+                this.setState({
+                    not_found: false, isEnd: false, paused: false, progress: 0,
+                    playable: 0, duration: 0, video: res.data._55.request.files.progressive[0].url
+                })
+            else
+                this.setState({
+                    not_found: true, isEnd: false, paused: false, progress: 0, playable: 0, duration: 0, video: ''
+                })
         })
-        if (not_found)
-            this.setState({ isEnd: false, paused: false, progress: 0, playable: 0, duration: 0, video: '' })
-        this.setState({ not_found })
         this._timeOut()
     }
 
@@ -300,12 +302,12 @@ export default class ZVideo extends Component {
                         muted={muted}
                         paused={paused}
                         source={{ uri: video ? video : 'https://' }}
-                        resizeMode={'cover'}
+                        resizeMode={'contain'}
                         style={stylePlayer}
                         onLoad={this._getDuration}
                         onProgress={this._setProgress}
                         onEnd={this._setEnd}
-                        onError={() => this.setState({ not_found: true })}
+                        // onError={() => { if (!item.id_video) this.setState({ not_found: true }) }}
                         ref={ref => this.player = ref}
                     />
                 </TouchableOpacity>
@@ -326,7 +328,7 @@ export default class ZVideo extends Component {
                             <View style={styles.info}>
                                 <Text style={[styles.fullTitle, { fontWeight: 'bold' }]}
                                     ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
-                                <Text style={styles.fullTitle}>Khắc Việt</Text>
+                                <Text style={styles.fullTitle}>{item.author}</Text>
                                 <View style={{ flex: 1 }} />
                                 {headphones(25, 'white')}
                                 <Text style={styles.fullTitle}> {listen}</Text>
@@ -393,8 +395,8 @@ export default class ZVideo extends Component {
 
                 {isFullscreen ? null :
                     <View style={styles.viewTitle}>
-                        <Text style={styles.title} ellipsizeMode='middle' numberOfLines={1}>{title} - </Text>
-                        <Text style={styles.singer}>Khắc Việt</Text>
+                        <Text style={styles.title} ellipsizeMode='tail' numberOfLines={1}>{title}</Text>
+                        <Text style={styles.singer} ellipsizeMode='tail' numberOfLines={1}> - {item.author}</Text>
                         <View style={{ flex: 1 }} />
                         {headphones(20, 'black')}
                         <Text style={styles.listen}> {listen}</Text>
@@ -534,7 +536,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#000007',
     },
     fullIcon: {
-        height: 40,
+        marginTop: 5,
+        height: 30,
         width: 50,
         justifyContent: 'center',
         alignItems: 'center',
@@ -583,9 +586,3 @@ const styles = StyleSheet.create({
         color: 'white'
     },
 })
-
-// midControls: {
-//     position: 'absolute',
-//     left: (width - 40) / 2,
-//     top: 105
-// },

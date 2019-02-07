@@ -1,22 +1,54 @@
-export const baseUrl = 'https://www.nhaccuatui.com/tim-kiem/mv?q=khac+viet&b=lieu-anh-co-the-yeu-em-khac-viet&page='
+import { filterHtml } from '../Utils'
+import {
+    startUrlItem, endUrlItem, startUrlHref, endUrlHref, startUrlTitle, endUrlTitle, startUrlImage, endUrlImage,
+    startUrlTime, endUrlTime, endUrlListen, startUrlListen, startUrlAuthor, endUrlAuthor
+} from './Const'
 
-export const startUrlItem = '<li class="small_item_video">'
-export const endUrlItem = '<div class="box_info">'
+function request(api, type) {
+    return fetch(api).then((resp) => {
+        if (resp.ok) {
+            if (type == 'html') {
+                // console.log(resp, api, type)
+                return {
+                    data: filterHtml(startUrlItem, endUrlItem, resp.text()._55)
+                        .filter(item => { if (item) return item })
+                        .map(e => {
+                            // console.log(e)
+                            const id_video = filterHtml(startUrlHref, endUrlHref, e)[0]
+                            const title = filterHtml(startUrlTitle, endUrlTitle, e)[0]
+                            const author = filterHtml(startUrlAuthor, endUrlAuthor, e)[0]
+                            const image = filterHtml(startUrlImage, endUrlImage, e)[0]
+                            const total_time = filterHtml(startUrlTime, endUrlTime, e)[0]
+                            const total_listen = filterHtml(startUrlListen, endUrlListen, e)[0]
+                            return { title, author, id_video, total_time, total_listen, image }
+                        }),
+                    success: true
+                }
+            }
+            else
+                return {
+                    data: resp.json(),
+                    success: true
+                }
+        }
+        return { success: false }
+    }).catch(err => { return { success: false } })
+}
 
-export const startUrlHref = '<a href="'
-export const endUrlHref = '.html'
+// =============================== Apis ================================= //
 
-export const startUrlTitle = 'title="'
-export const endUrlTitle = '" key="'
+export function getMyVideos(params) {
+    // console.log(params)
+    let api = `https://vimeo.com/user94770972` + params
+    return request(api, 'html')
+}
 
-export const startUrlImage = 'data-src="'
-export const endUrlImage = '" onerror="common.handleErrorImage'
+export function searchVideos(params) {
+    let api = `https://vimeo.com/search` + params
+    return request(api, 'html')
+}
 
-export const startUrlTime = '<span class="total_time">'
-export const endUrlTime = '</span>                                    <p class="count_view">'
-
-export const startUrlListen = '<span id="NCTCounter_sg_'
-export const endUrlListen = '">0</span></p>'
-
-export const startUrlVideo = '<video'
-export const endUrlVideo = '</video>'
+export function getVideo(id_video) {
+    let api = `https://player.vimeo.com/video/${id_video}/config?autopause=1&autoplay=1&byline=0&bypass_privacy=1&collections=1&context=Vimeo%5CController%5CClipController.main&default_to_hd=1&outro=nothing&portrait=0&share=1&title=0&watch_trailer=0`
+    return request(api, 'json')
+}

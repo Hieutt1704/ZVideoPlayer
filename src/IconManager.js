@@ -16,6 +16,9 @@ export const headphones = (size, color) => <Icon name={'headphones'} size={px2dp
 export const alert_outline = (size, color) => <Icon name={'alert-outline'} size={px2dp(size)} color={color} />
 export const volume_on = (size) => <Icon name={'volume-high'} size={px2dp(size)} color='#009ef8' />
 export const volume_off = (size) => <Icon name={'volume-off'} size={px2dp(size)} color='#009ef8' />
+export const clear = (size) => <Icon name={'close'} size={px2dp(size)} color='white' />
+export const search = (size) => <IconF name={'search'} size={px2dp(size)} color='white' />
+export const home = (size) => <IconF name={'home'} size={px2dp(size)} color='white' />
 
 //video
 export const anh_yeu_em = require('./assets/anh_yeu_em.mp4')

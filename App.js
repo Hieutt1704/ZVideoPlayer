@@ -2,27 +2,27 @@ import React from 'react'
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar } from 'react-native'
 
 import ZVideo from './src/Component/Video'
-import ItemMV from './src/Component/ItemMV'
-import { alert_outline } from './src/IconManager'
+import { getStatusBarHeight } from './src/Utils'
+import { alert_outline, home } from './src/IconManager'
 import SplashScreen from 'react-native-splash-screen'
-import { filterHtml, getStatusBarHeight } from './src/Utils'
-import {
-    baseUrl, startUrlItem, endUrlItem, startUrlHref, endUrlHref, startUrlTitle, endUrlTitle,
-    startUrlImage, startUrlTime, endUrlTime, startUrlListen, endUrlListen, endUrlImage
-} from './src/Networking/Apis'
+import { ItemMV, SearchBar } from './src/Views/ViewManager'
+import { getMyVideos, searchVideos } from './src/Networking/Apis'
 
 class App extends React.Component {
     constructor(props) {
         super(props)
         console.disableYellowBox = true
         this.state = {
+            type: 'home',
+            keysearch: '',
             videos: [],
-            next_page: 1,
+            next_page: 2,
             end_page: false,
             is_refresh: false,
             err: false,
             load_center: true,
             isFullscreen: false,
+            is_search: false
         }
         this._getVideos = this._getVideos.bind(this)
         this._onRefresh = this._onRefresh.bind(this)
@@ -30,13 +30,15 @@ class App extends React.Component {
         this._openVideo = this._openVideo.bind(this)
         this._onNext = this._onNext.bind(this)
         this._onPrevous = this._onPrevous.bind(this)
+        this._goHome = this._goHome.bind(this)
+        this._onSearch = this._onSearch.bind(this)
     }
 
     componentDidMount() {
-        SplashScreen.hide()
         this.setState({ load_center: true }, () => {
             this._getVideos()
                 .then(res => {
+                    SplashScreen.hide()
                     if (!res.success)
                         setTimeout(() => {
                             this.setState({ err: true, load_center: false })
@@ -47,36 +49,28 @@ class App extends React.Component {
         })
     }
 
-    _getData(url) {
-        return fetch(url).then((resp) => {
-            // console.log(resp)
-            if (resp.ok) return resp.text()
-        }).then((text) => {
-            if (text)
-                return {
-                    data: filterHtml(startUrlItem, endUrlItem, text).map((e, i) => {
-                        // console.log(e)
-                        const href = filterHtml(startUrlHref, endUrlHref, e)[0] + endUrlHref
-                        const title = filterHtml(startUrlTitle, endUrlTitle, e)[0]
-                        const image = filterHtml(startUrlImage, endUrlImage, e)[0]
-                        const total_time = filterHtml(startUrlTime, endUrlTime, e)[0]
-                        const total_listen = filterHtml(startUrlListen, endUrlListen, e)[0]
-                        const item = { title, href, total_time, total_listen, image }
-                        return item
-                    }),
-                    success: true
-                }
-            return { success: false }
-        }).catch(err => { return { success: false } })
+    _getData(page) {
+        // console.log(type, keysearch)
+        const { type, keysearch } = this.state
+        if (type == 'home') {
+            const params = '?page=' + page
+            return getMyVideos(params)
+        }
+        else {
+            const params = '?page=' + page + '&q=' + keysearch
+            return searchVideos(params)
+        }
     }
 
     _getVideos() {
-        return this._getData(baseUrl)
+        return this._getData(1)
             .then(res => {
+                // console.log(res)
                 if (res.success)
                     this.setState({
                         videos: res.data,
-                        end_page: res.data.length < 40
+                        next_page: 2,
+                        end_page: res.data.length < 18
                     })
                 return res
             })
@@ -96,12 +90,12 @@ class App extends React.Component {
     _onLoadMore() {
         const { videos, next_page, end_page } = this.state
         if (end_page) return
-        this._getData(baseUrl + next_page).then(res => {
+        this._getData(next_page).then(res => {
             if (res.success)
                 this.setState({
                     videos: videos.concat(res.data),
                     next_page: next_page + 1,
-                    end_page: res.data.length < 40
+                    end_page: res.data.length < 18
                 })
             else alert('Opps, somthing went wrong!')
         })
@@ -111,9 +105,11 @@ class App extends React.Component {
         const { videos } = this.state
         const index = videos.indexOf(item)
         if (index == 0)
-            this.ZVideo._getVideo(item.href)
+            this.ZVideo._getVideo(item.id_video)
         else {
-            const cutVideos = videos.splice(0, index)
+            const cutVideos = videos.splice(0, index).map((e, i, a) => {
+                return a[a.length - 1 - i]
+            })
             const newVideos = videos.concat(cutVideos)
             this.setState({ videos: newVideos })
         }
@@ -143,10 +139,21 @@ class App extends React.Component {
             this.FlatList.scrollToOffset({ animated: true, offset: 0 })
     }
 
+    _goHome() {
+        this.setState({ type: 'home', is_search: true }, () => {
+            this._getVideos().then(res => this.setState({ is_search: false }))
+        })
+    }
+
+    _onSearch(key) {
+        this.setState({ type: 'search', keysearch: key, is_search: true }, () => {
+            this._getVideos().then(res => this.setState({ is_search: false }))
+        })
+    }
+
     render() {
-        const { videos, end_page, is_refresh, err, load_center, isFullscreen } = this.state
-        // console.log(isFullscreen)
-        const vLoad = !end_page && videos.length > 0 || load_center ?
+        const { videos, end_page, is_refresh, err, load_center, isFullscreen, keysearch, is_search } = this.state
+        const vLoad = !end_page && videos.length > 0 || load_center || is_search ?
             <View style={load_center ? styles.container : styles.loading}>
                 <ActivityIndicator size={"large"} color={'#009ef8'} animating={true} />
             </View> : null
@@ -172,6 +179,11 @@ class App extends React.Component {
                     :
                     < View style={styles.container}>
 
+                        <SearchBar
+                            goHome={this._goHome}
+                            onSearch={this._onSearch}
+                        />
+
                         <ZVideo
                             ref={ref => this.ZVideo = ref}
                             item={videos.length > 0 ? videos[0] : {}}
@@ -181,24 +193,32 @@ class App extends React.Component {
                         />
 
                         {!isFullscreen ?
-                            <FlatList
-                                ref={ref => this.FlatList = ref}
-                                refreshing={is_refresh}
-                                onRefresh={this._onRefresh}
-                                data={videos}
-                                numColumns={2}
-                                keyExtractor={(item, index) => index + ''}
-                                renderItem={({ item, index }) =>
-                                    <ItemMV
-                                        item={item}
-                                        index={index}
-                                        openVideo={this._openVideo}
+                            is_search ?
+                                vLoad
+                                : videos.length == 0 ?
+                                    <View style={styles.container}>
+                                        <Text style={styles.fail}>0 results for {keysearch}.</Text>
+                                        <Text style={styles.fail}>Try searching again using broader keywords.</Text>
+                                    </View>
+                                    :
+                                    <FlatList
+                                        ref={ref => this.FlatList = ref}
+                                        refreshing={is_refresh}
+                                        onRefresh={this._onRefresh}
+                                        data={videos}
+                                        numColumns={2}
+                                        keyExtractor={(item, index) => index + ''}
+                                        renderItem={({ item, index }) =>
+                                            <ItemMV
+                                                item={item}
+                                                index={index}
+                                                openVideo={this._openVideo}
+                                            />
+                                        }
+                                        onEndReached={this._onLoadMore}
+                                        onEndReachedThreshold={0.2}
+                                        ListFooterComponent={vLoad}
                                     />
-                                }
-                                onEndReached={this._onLoadMore}
-                                onEndReachedThreshold={0.2}
-                                ListFooterComponent={vLoad}
-                            />
                             : null
                         }
 
@@ -216,7 +236,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#009ef8',
         paddingTop: getStatusBarHeight(),
-        // paddingBottom: 20 + getBottomSpace(),
     },
     container: {
         flex: 1,
@@ -246,5 +265,5 @@ const styles = StyleSheet.create({
     fail: {
         color: 'grey',
         fontSize: 14,
-    }
+    },
 })

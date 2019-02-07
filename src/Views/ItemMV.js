@@ -18,14 +18,14 @@ const ItemMV = ({ item, openVideo }) => {
 
             <View style={styles.viewTotal}>
                 {headphones(18, 'white')}
-                <Text style={styles.total}> {item ? fixNumber(item.total_listen) : 0}</Text>
+                <Text style={styles.total}> {item.total_listen ? fixNumber(item.total_listen) : 0}</Text>
                 <View style={{ flex: 1 }} />
                 <Text style={styles.total}>{item.total_time} </Text>
             </View>
 
             <Text style={styles.song} ellipsizeMode='tail' numberOfLines={1}>{item.title}</Text>
 
-            <Text style={styles.singer}>Khắc Việt</Text>
+            <Text style={styles.singer}>{item.author}</Text>
 
         </TouchableOpacity>
     )
