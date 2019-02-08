@@ -1,9 +1,9 @@
 # ZVideoPlayer
 
 ## Description
-A fun video player crawl data from [Nhaccuatui Pages](https://www.nhaccuatui.com/)
+A fun video player crawl data from [Vimeo Pages](https://vimeo.com/)
 
 ## Todo 
 - [x] Crawl info 
-- [ ] Crawl video url
-- [ ] Get apis follow author,song,kind of music 
+- [x] Crawl video url
+- [X] Get apis follow author,song,kind of music(Fail on android)
