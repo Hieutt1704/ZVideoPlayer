@@ -41,14 +41,16 @@ function request(api, type) {
                     }
             }
             else {
-                // console.log(resp.json())
                 return {
                     data: resp.json(),
                     success: true
                 }
             }
         }
-        return { success: false }
+        else {
+            // console.log(resp.text()._55)
+            return { success: false }
+        }
     }).catch(err => { return { success: false } })
 }
 

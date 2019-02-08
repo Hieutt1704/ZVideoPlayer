@@ -170,8 +170,8 @@ export default class ZVideo extends Component {
     }
 
     _togglePlayPause() {
-        const { paused, progress } = this.state
-        if (progress >= 0.9981) { //when video end -> replay
+        const { paused, isEnd } = this.state
+        if (isEnd) { //when video end -> replay
             this.setState({ progress: 0, isEnd: false })
             this.player.seek(0)
         }
@@ -537,7 +537,6 @@ const styles = StyleSheet.create({
     fullPlayer: {
         width: height - getStatusBarHeight(),
         height: width + scale(2),
-        backgroundColor: '#000007',
     },
     fullIcon: {
         marginTop: scale(5),

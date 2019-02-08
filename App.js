@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-    View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar, Keyboard, Platform
+    View, FlatList, StyleSheet, Text, TouchableOpacity, ActivityIndicator, StatusBar, Keyboard, Platform, ToastAndroid
 } from 'react-native'
 
 import ZVideo from './src/Component/Video'
@@ -153,8 +153,13 @@ class App extends React.Component {
 
     _onSearch(key) {
         Keyboard.dismiss()
-        if (Platform.OS != 'ios')
-            alert('Comming soon on android')
+        if (Platform.OS != 'ios') {
+            ToastAndroid.showWithGravity(
+                'Comming soon on android',
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER,
+            )
+        }
         else
             this.setState({ type: 'search', keysearch: key, is_search: true }, () => {
                 this._getVideos().then(res => this.setState({ is_search: false }))
