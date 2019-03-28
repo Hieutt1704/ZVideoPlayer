@@ -18,9 +18,11 @@ A fun video player crawl data from [Vimeo Pages](https://vimeo.com/)
 
 ## Demo
 
-:triumph:                          :thumbsup:                            :clap:                                                    
+:triumph: Screen home                                                                                                  
+![](./src/assets/demo_zplayer.gif) 
 
-![](./src/assets/demo_zplayer.gif) ![](./src/assets/search_justatee.gif) ![](./src/assets/open_video.gif) 
+:thumbsup: Seach videos
+![](./src/assets/search_justatee.gif)  
 
-
-
+:clap: Play a video
+![](./src/assets/open_video.gif)
