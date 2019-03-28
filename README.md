@@ -22,10 +22,10 @@ A fun video player crawl data from [Vimeo Pages](https://vimeo.com/)
 
 ![](./src/assets/demo_zplayer.gif) 
 
-:thumbsup: Seach videos
+:thumbsup: Seach videos 
 
 ![](./src/assets/search_justatee.gif)  
 
-:clap: Play a video
+:clap: Play a video 
 
 ![](./src/assets/open_video.gif)
