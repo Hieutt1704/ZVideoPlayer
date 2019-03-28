@@ -3,8 +3,6 @@
 ## Description
 A fun video player crawl data from [Vimeo Pages](https://vimeo.com/)
 
-## Demo
-
 ## Support
 - Android:  6.0.0 and above
 - IOS: IOS 9.0.0 and above
@@ -15,9 +13,7 @@ A fun video player crawl data from [Vimeo Pages](https://vimeo.com/)
 - [X] Get apis follow author,song,kind of music(Fail on android)
 
 ## File create
-
 - [Android](https://drive.google.com/file/d/1UmEWmDy5aMprWqhxurL-ehWUAKA-_oQE/view?usp=sharing)
-
 - [IOS](https://drive.google.com/file/d/1gqCqHy-v1QamVHj7yp4OYwHyrTt_XWmT/view?usp=sharing)
 
 ## Demo
